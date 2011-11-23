@@ -131,11 +131,17 @@ class Module
         auto m = new Module;
         m.path         = path;
         m.timeModified = timeLastModified(m.path).stdTime;
-
+        
+        // major todo: major problem, phobos doesn't fail opening empty file
+        // but keeps it closed, making byLine throw.
+        
         auto file = File(m.path, "r");
-
+        writeln(m.path);
+        
         foreach (aLine; file.byLine)
         {
+            writeln(__FILE__, " ", __LINE__);
+            
             string line = trim(aLine).idup;
 
             //if(moduleHeaderRegex.test(line))
@@ -149,6 +155,7 @@ class Module
 
                 break;
             }
+            
         }
 
         if (!m.name)

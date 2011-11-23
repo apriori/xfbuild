@@ -42,7 +42,9 @@ struct BuildTask
         this.mainFiles   = mainFiles;
 
         //profile!("BuildTask.readDeps")({
+        
         readDeps();
+        
 
         //});
     }
@@ -94,10 +96,12 @@ struct BuildTask
 
     private void readDeps()
     {
+        
         if (globalParams.useDeps && std.file.exists(globalParams.depsPath))
         {
-            scope file = File(globalParams.depsPath, "r");
-
+            
+            auto file = File(globalParams.depsPath, "r");
+            
             foreach (aLine; file.byLine)
             {
                 string line = strip(aLine).idup;
@@ -224,10 +228,15 @@ struct BuildTask
             }
         }
 
+        
         foreach (mainFile; mainFiles)
         {
+            
+            
+            // fail:
             auto m = Module.fromFile(mainFile);
-
+            
+            
             if (m.name !in modules)
             {
                 modules[m.name] = m;
@@ -240,7 +249,7 @@ struct BuildTask
 
     private void writeDeps()
     {
-        auto file = new File(globalParams.depsPath, "w");
+        auto file = File(globalParams.depsPath, "w");
         
         foreach (m; modules)
         {

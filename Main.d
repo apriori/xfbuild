@@ -376,7 +376,7 @@ int main(string[] allArgs)
                 {
                     if (child.isFile)
                     {
-                        if (child.extension == "d")
+                        if (child.extension == ".d")
                         {
                             // major todo: this used to be .toString
                             modules ~= child;
@@ -419,8 +419,10 @@ int main(string[] allArgs)
             .threadPool = new ThreadPoolT(globalParams.threadsToUse);
         }
 
+        
         {
-            scope buildTask = new BuildTask(!removeDeps, mainFiles);
+            
+            auto buildTask = new BuildTask(!removeDeps, mainFiles);
 
             if (!std.file.exists(globalParams.objPath))
                 mkdir(globalParams.objPath);
@@ -434,9 +436,11 @@ int main(string[] allArgs)
             if (quit)
                 return 0;
 
+            
             if (mainFiles is null)
                 throw new Exception("At least one MODULE needs to be specified, see +help");
 
+            writeln("ABOUT TO BUILD");
             buildTask.execute();
         }
 
