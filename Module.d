@@ -16,7 +16,7 @@ alias strip trim;
 // todo: not sure if correct
 size_t locatePrior(string source, string match, size_t start = size_t.max)
 {
-    return lastIndexOf(source[min($, start) .. $], match);
+    return lastIndexOf(source[0 .. min(start, $)], match);
 }
 
 class Module
@@ -32,7 +32,6 @@ class Module
 
     string lastName()
     {
-        //~ locatePrior (source, match, start)          // find prior char
         auto dotPos = locatePrior(name, ".");
 
         if (dotPos == name.length)
@@ -52,7 +51,7 @@ class Module
     }
 
     string[] depNames;
-    Module[] deps;              // only direct deps
+    Module[] deps;  // only direct deps
 
     long timeDep;
     long timeModified;
@@ -132,16 +131,17 @@ class Module
         m.path         = path;
         m.timeModified = timeLastModified(m.path).stdTime;
         
-        // major todo: major problem, phobos doesn't fail opening empty file
+        // @BUG@ Workaround: Phobos doesn't fail opening empty file
         // but keeps it closed, making byLine throw.
+        if (std.file.getSize(m.path) == 0)
+        {
+            throw new Exception(format("module '%s' is empty", path));
+        }
         
         auto file = File(m.path, "r");
-        writeln(m.path);
         
         foreach (aLine; file.byLine)
         {
-            writeln(__FILE__, " ", __LINE__);
-            
             string line = trim(aLine).idup;
 
             //if(moduleHeaderRegex.test(line))

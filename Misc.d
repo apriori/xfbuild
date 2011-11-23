@@ -36,11 +36,11 @@ string[] decomposeString(string str, string[] foo ...)
                 // locatePattern (source, match, start);       // find pattern
                 int l = str.locatePattern(delim);
 
-                if (l == str.length)
+                if (l == str.length || l == -1)
                 {
                     return null;  // fail
                 }
-
+                
                 res ~= str[0..l];
                 str = str[l..$];
             }

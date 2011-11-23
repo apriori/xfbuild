@@ -414,10 +414,11 @@ int main(string[] allArgs)
                 }
            }+/
 
-        version (MultiThreaded) 
-        {
-            .threadPool = new ThreadPoolT(globalParams.threadsToUse);
-        }
+        // major todo: std.parallelism will take care of this
+        //~ version (MultiThreaded) 
+        //~ {
+            //~ .threadPool = new ThreadPoolT(globalParams.threadsToUse);
+        //~ }
 
         
         {
@@ -440,7 +441,6 @@ int main(string[] allArgs)
             if (mainFiles is null)
                 throw new Exception("At least one MODULE needs to be specified, see +help");
 
-            writeln("ABOUT TO BUILD");
             buildTask.execute();
         }
 

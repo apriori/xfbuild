@@ -134,11 +134,16 @@ struct Process
     }
 }
 
-
 class ProcessExecutionException : Exception
 {
-    this(string msg) {
+    this(string msg) 
+    {
         super(msg);
+    }
+    
+    this(string msg, string file, size_t line, Exception next = null)
+    {
+        super(msg, file, line, next);
     }
 }
 
@@ -153,7 +158,8 @@ void checkProcessFail(Process process)
         if (name.length > 255)
             name = name[0 .. 255] ~ " [...]";
 
-        throw new ProcessExecutionException(`"` ~ name ~ `" returned ` ~ to!string(result.status));
+        //~ throw new ProcessExecutionException(`"` ~ name ~ `" returned ` ~ to!string(result.status));
+        throw new ProcessExecutionException(`"` ~ name ~ `" returned ` ~ to!string(result.status), __FILE__, __LINE__);
     }
 }
 
@@ -182,7 +188,8 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
 
         if (ret != 0)
         {
-            throw new ProcessExecutionException(`"` ~ sys ~ `" returned ` ~ to!string(ret));
+            //~ throw new ProcessExecutionException(`"` ~ sys ~ `" returned ` ~ to!string(ret));
+            throw new ProcessExecutionException(`"` ~ sys ~ `" returned ` ~ to!string(ret), __FILE__, __LINE__);
         }
     }
 
@@ -252,23 +259,34 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
 
                     if (exitCode != 0)
                     {
-                        throw new ProcessExecutionException(
-                                  format("'%s' returned %s.", allCmd, exitCode)
+                        //~ throw new ProcessExecutionException(
+                                  //~ format("'%s' returned %s.", allCmd, exitCode)
+                                  //~ );                        
+                            throw new ProcessExecutionException(
+                                  format("'%s' returned %s.", allCmd, exitCode), __FILE__, __LINE__
                                   );
                     }
                 }
                 else if (rc == WAIT_FAILED)
                 {
+                    //~ throw new ProcessExecutionException(
+                              //~ format("'%s' failed with an unknown exit status.", allCmd)
+                              //~ );
                     throw new ProcessExecutionException(
-                              format("'%s' failed with an unknown exit status.", allCmd)
+                              format("'%s' failed with an unknown exit status.", allCmd), __FILE__, __LINE__
                               );
+                    
                 }
             }
             else
             {
+                //~ throw new ProcessExecutionException(
+                          //~ format("Could not execute '%s'.", allCmd)
+                          //~ );
                 throw new ProcessExecutionException(
-                          format("Could not execute '%s'.", allCmd)
+                          format("Could not execute '%s'.", allCmd), __FILE__, __LINE__
                           );
+                
             }
         }
     }
@@ -279,14 +297,13 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
     }
 }
 
+__gshared int value;
+
 void executeCompilerViaResponseFile(string compiler, string[] args, size_t affinity)
 {
-    __gshared static int value;
+    atomicOp!"+="(value, 1);
     
-    // todo: thisTid is not unique
-    //~ string rspFile = format("xfbuild.{:x}.rsp", cast(void*)&thisTid);
-    string rspFile = format("xfbuild.%s.rsp", value++);
-    
+    string rspFile = format("xfbuild.%s.rsp", value);    
     string rspData = args.join("\n");
 
     /+if (globalParams.verbose) {
@@ -308,6 +325,7 @@ void executeCompilerViaResponseFile(string compiler, string[] args, size_t affin
         std.file.remove(rspFile);
     }
 
+    file.close();
     executeAndCheckFail([compiler, "@" ~ rspFile], affinity);
 }
 

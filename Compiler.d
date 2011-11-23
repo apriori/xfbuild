@@ -10,6 +10,7 @@ private
 
     import dcollections.HashSet;
     
+    import std.parallelism;
     import std.array;
     import std.file;
     import std.stdio;
@@ -52,11 +53,14 @@ shared static this()
 
 class CompilerError : BuildException
 {
-    this(string msg) {
+    this(string msg) 
+    {
         super(msg);
     }
-    this(string m, string fl, size_t ln, Exception next = null){
-        super(m, fl, ln, next);
+    
+    this(string msg, string file, size_t line, Exception next = null)
+    {
+        super(msg, file, line, next);
     }
 }
 
@@ -136,7 +140,7 @@ void compileAndTrackDeps(
 
         version (MultiThreaded) 
         {
-            synchronized (.threadPool) return worker();
+            synchronized (.taskPool) return worker();
         }
         else
         {
@@ -187,7 +191,8 @@ void compileAndTrackDeps(
     {
         try
         {
-            compile(opts, compileArray, 
+            compile(opts, 
+                    compileArray, 
                     (string line) 
                     {
                         if (!isVerboseMsg(line) && strip(line).length)
@@ -212,7 +217,7 @@ void compileAndTrackDeps(
 
                 mods ~= m.name;
             }
-
+            
             throw new CompilerError("Error compiling " ~ mods, __FILE__,
                                     __LINE__, e);
         }
@@ -231,6 +236,7 @@ void compileAndTrackDeps(
         
         scope (exit) 
         {
+            depsFile.close();
             std.file.remove(depsFileName);
         }
 
@@ -553,13 +559,13 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
             Module[][] threadNow   = new Module[][threads];
             Module[][] threadLater = new Module[][threads];
 
-            foreach (th; mtFor(.threadPool, 0, threads))
+            foreach (th; mtFor(.taskPool, 0, threads))
             {
                 auto mods = compileNow[compileNow.length * th / threads .. compileNow.length * (th + 1) / threads];
 
                 if (globalParams.verbose)
                 {
-                    Trace.formatln("Thread %s: compiling %s modules", th, mods.length);
+                    writefln("Thread %s: compiling %s modules", th, mods.length);
                 }
 
                 if (mods.length > 0)

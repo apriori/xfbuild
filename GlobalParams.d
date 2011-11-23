@@ -56,7 +56,7 @@ struct GlobalParams
     bool useOP = true;
     bool recompileOnUndefinedReference = false;
     bool storeStrongSymbols = true;     // TODO
-    alias pathSeparator pathSep;
+    alias dirSeparator pathSep;
     int maxModulesToCompile = int.max;
     int threadsToUse        = 1;
     bool nolink = false;
@@ -82,8 +82,7 @@ struct GlobalParams
 
 __gshared GlobalParams globalParams;
 
-// todo: remove probably
-version (MultiThreaded) 
-{
-    __gshared ThreadPoolT threadPool;
-}
+//~ version (MultiThreaded) 
+//~ {
+    //~ __gshared ThreadPoolT threadPool;
+//~ }
