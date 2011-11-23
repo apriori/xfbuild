@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/projects/dcollections/!svn/ver/102/branches/d2/examples
+END
+build-examples-win32.bat
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/projects/dcollections/!svn/ver/88/branches/d2/examples/build-examples-win32.bat
+END
+lists.d
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/projects/dcollections/!svn/ver/102/branches/d2/examples/lists.d
+END
+sets.d
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/projects/dcollections/!svn/ver/79/branches/d2/examples/sets.d
+END
+build-examples-linux.sh
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/projects/dcollections/!svn/ver/102/branches/d2/examples/build-examples-linux.sh
+END
+cursors.d
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/projects/dcollections/!svn/ver/74/branches/d2/examples/cursors.d
+END
+maps.d
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/projects/dcollections/!svn/ver/79/branches/d2/examples/maps.d
+END
+multisets.d
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/projects/dcollections/!svn/ver/79/branches/d2/examples/multisets.d
+END
+iterators.d
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/projects/dcollections/!svn/ver/102/branches/d2/examples/iterators.d
+END

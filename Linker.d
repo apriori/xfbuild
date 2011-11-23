@@ -9,22 +9,14 @@ private
 
     import std.ascii : isAlpha;
     import std.array;
-    
-    //~ import tango.sys.Process;
-    //~ import tango.io.stream.Lines;
-    //~ import tango.stdc.ctype : isAlpha;
-    //~ import tango.text.Util  : contains;
-    //~ import Array = tango.core.Array;
-
-    //~ // TODO: better logging
-    //~ import tango.io.Stdout;
+    import std.stdio;
 }
 
 /+private {
         Regex linkerFileRegex;
    }
 
-   static this() {
+   shared static this() {
         //defend\terrain\Generator.obj(Generator)
         //linkerFileRegex = Regex(`([a-zA-Z0-9.:_\-\\/]+)\(.*\)`);
    }+/
@@ -104,7 +96,7 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
     {
         //~ this(bool copyEnv, char[][] args...)
         // copies environment variables
-        scope process = new Process(true, args);
+        auto process = Process(true, args);
         
         // todo: use different execute, this one redirects to tango
         execute(process);
@@ -124,13 +116,13 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
         // todo: this is basically redirect, we read from the process
         // to see what it prints out. But we can do the same via
         // system.
-        foreach (line; new Lines!(char)(procOut))
+        foreach (line; procOut)
         {
-            line = TextUtil.trim(line);
+            line = strip(line);
 
             if (line.length > 0)
             {
-                Stdout.formatln("linker: '{}'", line);
+                writefln("linker: '%s'", line);
             }
 
             try
@@ -149,12 +141,12 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
 
                     if (!currentModule && globalParams.verbose)
                     {
-                        Stdout.formatln("{} doesn't belong to any known module", currentFile);
+                        writefln("%s doesn't belong to any known module", currentFile);
                         continue;
                     }
 
                     if (globalParams.verbose)
-                        Stdout.formatln("linker error in file {} (module {})", currentFile, currentModule);
+                        writefln("linker error in file %s (module %s)", currentFile, currentModule);
                 }
                 else if (/*undefinedReferenceRegex.test(line)*/ line.startsWith("Error 42:") && globalParams.recompileOnUndefinedReference)
                 {
@@ -162,17 +154,17 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
                     {
                         if (!currentFile || !currentModule)
                         {
-                            Stdout.formatln("no file.. wtf?");
+                            writefln("no file.. wtf?");
 
                             //continue; // as i currently recompile every file anyway...
                         }
 
-                        /*Stdout.formatln("undefined reference to {}, will try to recompile {}", undefinedReferenceRegex[1], currentModule);
+                        /*writefln("undefined reference to %s, will try to recompile %s", undefinedReferenceRegex[1], currentModule);
 
                            currentModule.needRecompile = true;
                            retryCompile = true;*/
 
-                        Stdout.formatln("undefined reference, will try teh full recompile :F");
+                        writefln("undefined reference, will try teh full recompile :F");
 
                         foreach (m; modules)
                             m.needRecompile = true;
@@ -187,8 +179,8 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
             {
                 if (currentFile && currentModule)
                 {
-                    Stdout.formatln("{}", e);
-                    Stdout.formatln("utf8 exception caught, assuming linker error in file {}", currentModule);
+                    writefln("%s", e);
+                    writefln("utf8 exception caught, assuming linker error in file %s", currentModule);
 
                     // orly!
                     foreach (m; modules)
@@ -223,7 +215,7 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
             }
 
             if (retryCompile && globalParams.verbose)
-                Stdout.formatln("ignoring linker error, will try to recompile");
+                writeln("ignoring linker error, will try to recompile");
             else if (!retryCompile)
                 throw e;                 // rethrow exception since we're not going to retry what we did
 

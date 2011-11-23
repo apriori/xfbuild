@@ -29,12 +29,12 @@ struct SysError
             return errno;
     }
 
-    static char[] lastMsg()
+    static string lastMsg()
     {
         return lookup(lastCode);
     }
 
-    static char[] lookup(uint errcode)
+    static string lookup(uint errcode)
     {
         char[] text;
 
@@ -82,12 +82,24 @@ struct SysError
             text = pemsg[0..r].dup;
         }
 
-        return text;
+        // todo: remove dup
+        return text.idup;
     }
 }
 
 struct Process
 {
+    string[] stdout()
+    {
+        enforce(0);
+        return null;
+    }
+    
+    this(bool copyEnv, string[] args)
+    {
+        assert(0);
+    }
+    
     // todo
     void execute()
     {
@@ -269,8 +281,12 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
 
 void executeCompilerViaResponseFile(string compiler, string[] args, size_t affinity)
 {
-    // todo: this might not be good, not sure.
-    string rspFile = format("xfbuild.{:x}.rsp", cast(void*)&thisTid);
+    __gshared static int value;
+    
+    // todo: thisTid is not unique
+    //~ string rspFile = format("xfbuild.{:x}.rsp", cast(void*)&thisTid);
+    string rspFile = format("xfbuild.%s.rsp", value++);
+    
     string rspData = args.join("\n");
 
     /+if (globalParams.verbose) {

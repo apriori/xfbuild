@@ -1,4 +1,4 @@
-module test;
+module xfbuild.Module;
 
 private 
 {
@@ -8,8 +8,8 @@ private
 
 import std.string : lastIndexOf, splitLines, strip;
 import std.algorithm : min;
-import std.file : timeLastModified, File;
-import std.stdio : writefln;
+import std.file;
+import std.stdio;
 import std.array : replace;
 alias strip trim;
 
@@ -145,7 +145,7 @@ class Module
                 m.name = arr[0];
 
                 if (globalParams.verbose) 
-                    writefln("module name for file '%s': {}", path, m.name);
+                    writefln("module name for file '%s': %s", path, m.name);
 
                 break;
             }
