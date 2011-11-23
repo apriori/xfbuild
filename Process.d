@@ -10,20 +10,17 @@ private
     import win32.winnls;
 
     import std.concurrency;
+    import std.exception;
     import std.process;
     import std.stdio;
     import std.string;
-    import std.array; 
+    import std.array;
     import std.utf;
     import std.conv : to;
 }
 
 struct SysError
 {
-    /***********************************************************************
-
-    ***********************************************************************/
-
     static uint lastCode()
     {
         version (Win32)
@@ -32,18 +29,10 @@ struct SysError
             return errno;
     }
 
-    /***********************************************************************
-
-    ***********************************************************************/
-
     static char[] lastMsg()
     {
         return lookup(lastCode);
     }
-
-    /***********************************************************************
-
-    ***********************************************************************/
 
     static char[] lookup(uint errcode)
     {
@@ -51,29 +40,29 @@ struct SysError
 
         version (Win32)
         {
-        DWORD  i;
-        LPWSTR lpMsgBuf;
+            DWORD  i;
+            LPWSTR lpMsgBuf;
 
-        i = FormatMessageW(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER |
-            FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_IGNORE_INSERTS,
-            null,
-            errcode,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),                             // Default language
-            cast(LPWSTR)&lpMsgBuf,
-            0,
-            null);
+            i = FormatMessageW(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                FORMAT_MESSAGE_FROM_SYSTEM |
+                FORMAT_MESSAGE_IGNORE_INSERTS,
+                null,
+                errcode,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),                         // Default language
+                cast(LPWSTR)&lpMsgBuf,
+                0,
+                null);
 
-        /* Remove \r\n from error string */
-        if (i >= 2)
-            i -= 2;
+            /* Remove \r\n from error string */
+            if (i >= 2)
+                i -= 2;
 
-        text = new char[i * 3];
-        i    = WideCharToMultiByte(CP_UTF8, 0, lpMsgBuf, i,
-                                   cast(PCHAR)text.ptr, text.length, null, null);
-        text = text [0 .. i];
-        LocalFree(cast(HLOCAL)lpMsgBuf);
+            text = new char[i * 3];
+            i    = WideCharToMultiByte(CP_UTF8, 0, lpMsgBuf, i,
+                                       cast(PCHAR)text.ptr, text.length, null, null);
+            text = text [0 .. i];
+            LocalFree(cast(HLOCAL)lpMsgBuf);
         }
         else
         {
@@ -97,17 +86,18 @@ struct SysError
     }
 }
 
-
 struct Process
 {
     // todo
     void execute()
     {
+        assert(0);
     }
 
     // todo
     string toString()
     {
+        enforce(0);
         return "";
     }
 
@@ -121,12 +111,14 @@ struct Process
     // todo
     Result wait()
     {
+        enforce(0);
         return Result(0);
     }
 
     // todo
     ~this()
     {
+        enforce(0);
     }
 }
 
@@ -287,7 +279,7 @@ void executeCompilerViaResponseFile(string compiler, string[] args, size_t affin
     auto file = File(rspFile, "w");
     file.write(rspData);
 
-    scope (failure) 
+    scope (failure)
     {
         if (globalParams.removeRspOnFail)
         {
@@ -295,7 +287,7 @@ void executeCompilerViaResponseFile(string compiler, string[] args, size_t affin
         }
     }
 
-    scope (success) 
+    scope (success)
     {
         std.file.remove(rspFile);
     }

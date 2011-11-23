@@ -130,9 +130,6 @@ class Module
     {
         auto m = new Module;
         m.path         = path;
-        //~ m.timeModified = Path.modified(m.path).ticks;
-        
-        // todo: not sure if correct
         m.timeModified = timeLastModified(m.path).stdTime;
 
         auto file = File(m.path, "r");
@@ -147,7 +144,7 @@ class Module
                 //m.name = moduleHeaderRegex[1].dup;
                 m.name = arr[0];
 
-                if (globalParams.verbose)
+                if (globalParams.verbose) 
                     writefln("module name for file '%s': {}", path, m.name);
 
                 break;
