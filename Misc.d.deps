@@ -1,9 +1,0 @@
-binary    D:\DMD\dmd2\windows\bin\dmd.exe
-version   v2.056
-config    D:\DMD\dmd2\windows\bin\sc.ini
-parse     Misc
-importall Misc
-import    object	(D:\DMD\dmd2\windows\bin\..\..\src\druntime\import\object.di)
-semantic  Misc
-semantic2 Misc
-semantic3 Misc

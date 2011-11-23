@@ -1,17 +1,5 @@
 module test;
 
-import std.algorithm;
-import std.array;
-import std.stdio;
-import std.typetuple;
-import std.typecons;
-import std.traits;
-
-void main()
-{
-    
-}
-
 private 
 {
     import xfbuild.GlobalParams;
@@ -20,7 +8,8 @@ private
 
 import std.string : lastIndexOf, splitLines, strip;
 import std.algorithm : min;
-import std.file : timeLastModified;
+import std.file : timeLastModified, File;
+import std.stdio : writefln;
 import std.array : replace;
 alias strip trim;
 
