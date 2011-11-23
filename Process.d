@@ -9,6 +9,12 @@ private
     import win32.winbase;
     import win32.winnls;
 
+    version (Windows) 
+    {
+        extern (Windows) extern BOOL SetProcessAffinityMask(HANDLE, size_t);
+        extern (Windows) extern BOOL GetProcessAffinityMask(HANDLE, size_t*, size_t*);
+    }    
+    
     import std.concurrency;
     import std.exception;
     import std.process;

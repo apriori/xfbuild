@@ -1,0 +1,2 @@
+xfbuild depends on existing .deps file, but this becomes a problem when building individual projects,
+as older __main symbols get put in.

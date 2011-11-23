@@ -53,7 +53,10 @@ struct BuildTask
     {
         //profile!("BuildTask.writeDeps")({
         if (this.doWriteDeps)
+        {
+            writeln("WRITING DEPENDENCIES");
             writeDeps();
+        }
 
         //});
     }

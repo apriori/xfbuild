@@ -5,6 +5,7 @@
 module xfbuild.MT;
 
 import std.string : format;
+import std.stdio;
 
 // todo: implement with a proper logger
 struct TraceLog
@@ -91,12 +92,12 @@ version (MultiThreaded)
                 }
                 catch (BuildException e)
                 {
-                    Trace.formatln("Build failed: %s", e);
+                    writefln("Build failed: %s", e);
                     abort();
                 }
                 catch (Exception e)
                 {
-                    Trace.formatln("%s", e);
+                    writefln("%s", e);
                     abort();
                 }
                 
