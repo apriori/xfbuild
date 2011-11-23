@@ -12,6 +12,7 @@ private
     import xfbuild.BuildException;
     import xfbuild.Process;
 
+    import std.algorithm;
     import std.array;
     import std.conv;
     import std.stdio;
@@ -261,10 +262,7 @@ int main(string[] allArgs)
                                 );
 
 
-
-        // major todo: see if this is right
-        //~ auto threadsToUse = (totalCPUs * (threadsPerCPU + 1));
-        auto threadsToUse = (threadsPerCPU + 1);
+        auto threadsToUse = max(threadsPerCPU, 1);
         globalParams.threadsToUse = threadsToUse;
 
         bool quit       = false;
