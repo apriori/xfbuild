@@ -29,7 +29,9 @@
     Windows: Run build.bat
              You can also self-build via selfbuild.bat, if that floats your boat.
 
-    Linux: Run linuxbuild.sh (lousy shell script, I know)
+    Linux: 
+        Run chmod a-w+x linuxbuild.sh
+        Run ./linuxbuild.sh (lousy shell script, I know)
 
 == Using xfBuild ==
     Run xfBuild to see all the options. Typically to get an executable run:
