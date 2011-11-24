@@ -19,14 +19,22 @@
       Install it next to the xfBuild dir:
         .\xfBuild
         .\WindowsAPI
-        
+    
+    - DCollections 2.0 (included). Obtainable from:
+        http://www.dsource.org/projects/dcollections
+
     Tested on XP SP3 and Lubuntu, x86.
       
-== Building ==
+== Building xfBuild ==
     Windows: Run build.bat
              You can also self-build via selfbuild.bat, if that floats your boat.
 
     Linux: Run linuxbuild.sh (lousy shell script, I know)
+
+== Using xfBuild ==
+    Run xfBuild to see all the options. Typically to get an executable run:
+      
+      xfBuild main.d +omain.exe
 
 == What works ==
     Very simple hello_world builds, and most of my "sample code" stuff in my
@@ -36,3 +44,13 @@
     I have no idea what this project is licensed with, Tomasz Stachowiak needs
     to be contacted first. Some code was taken from Tango (by Tomasz), that
     code is BSD-licensed.
+
+== Acknowledgments ==
+    Special thanks to Tomasz Stachowiak for making xfBuild.
+
+== Links ==
+    D2 Programming Language homepage: http://d-programming-language.org/
+    xfBuild Original Homepage: http://bitbucket.org/h3r3tic/xfbuild
+    xfBuild Port Homepage: http://github.com/AndrejMitrovic/xfBuild
+    WindowsAPI bindings: http://dsource.org/projects/bindings/wiki/WindowsApi
+    DCollections: http://www.dsource.org/projects/dcollections
