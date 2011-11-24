@@ -44,7 +44,7 @@ ROOT:
 Recognized OPTION(s):
     +x=PACKAGE      Don't compile any modules within the package
     +full           Perform a full build
-    +clean          Remove object files
+    +clean          Perform clean, remove object files
     +redep          Remove the dependency file afterwards
     +v              Print the compilation commands
     +h              Manage headers for faster compilation
@@ -395,7 +395,7 @@ int main(string[] allArgs)
         
         {
             
-            auto buildTask = new BuildTask(!removeDeps, mainFiles);
+            auto buildTask = BuildTask(!removeDeps, mainFiles);
 
             if (!std.file.exists(globalParams.objPath))
                 mkdir(globalParams.objPath);
