@@ -7,7 +7,12 @@ module xfbuild.MT;
 import std.string : format;
 import std.stdio;
 
-// todo: implement with a proper logger
+version (MultiThreaded)
+{
+    import core.atomic;
+}
+
+// todo: implement a proper logger
 struct TraceLog
 {
     string error;
@@ -23,7 +28,6 @@ __gshared TraceLog Trace;
 version (MultiThreaded) 
 {
     import std.parallelism;
-    import core.atomic;
     import std.c.process;
     
     private 
@@ -93,12 +97,12 @@ version (MultiThreaded)
                 catch (BuildException e)
                 {
                     writefln("Build failed: %s", e);
-                    abort();
+                    exit(1);
                 }
                 catch (Exception e)
                 {
                     writefln("%s", e);
-                    abort();
+                    exit(1);
                 }
                 
                 atomicOp!"+="(numLeft, -1);

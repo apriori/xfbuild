@@ -2,9 +2,6 @@ module xfbuild.Main;
 
 private 
 {
-    //~ version (TraceExceptions)
-        //~ import tango.core.tools.TraceExceptions;
-
     import xfbuild.MT;
     import xfbuild.BuildTask;
     import xfbuild.Compiler : CompilerError;
@@ -22,22 +19,6 @@ private
     import std.process;
     import std.parallelism : totalCPUs;
     import std.cpuid : threadsPerCPU;
-    
-    //~ import tango.core.Version;
-    //~ import tango.stdc.stdlib     : exit;
-    //~ import tango.sys.Environment : Environment;
-    //~ import Integer = tango.text.convert.Integer;
-    //~ import tango.text.Util : split;
-
-    //~ //import tango.text.json.Json;
-    //~ import tango.io.FilePath;
-    //~ import tango.io.device.File;
-
-    //~ import Path  = tango.io.Path;
-    //~ import CPUid = xfbuild.CPUid;
-
-    //~ // TODO: better logging
-    //~ import tango.io.Stdout;
 }
 
 void printHelpAndQuit(int status)
@@ -411,13 +392,6 @@ int main(string[] allArgs)
                         }
                 }
            }+/
-
-        // major todo: std.parallelism will take care of this
-        //~ version (MultiThreaded) 
-        //~ {
-            //~ .threadPool = new ThreadPoolT(globalParams.threadsToUse);
-        //~ }
-
         
         {
             

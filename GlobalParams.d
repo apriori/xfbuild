@@ -1,18 +1,5 @@
 module xfbuild.GlobalParams;
 
-// todo: replace
-struct ThreadPoolT { }
-
-private 
-{
-    version (MultiThreaded) 
-    {
-        //~ import xfbuild.MT : ThreadPoolT;
-    }
-
-    //~ import tango.io.model.IFile;
-}
-
 import std.path;
 
 struct GlobalParams
@@ -21,10 +8,7 @@ struct GlobalParams
     string[] compilerOptions;
     string objPath  = ".objs";
     string depsPath = ".deps";
-
-    // drey todo: where is the .lib extension?
-    // linux might use .a, win uses .lib
-    
+   
     //string projectFile = "project.xfbuild";
     version (Windows) 
     {
@@ -33,11 +17,6 @@ struct GlobalParams
     }
     else
     {
-        // drey todo: replace with Linux version, OSX
-        // and others might be different, do static assert,
-        // and replace .o with .a maybe, unless that's only for
-        // libraries
-        
         string objExt = ".o";
         string exeExt = "";
     }
@@ -54,9 +33,9 @@ struct GlobalParams
     bool depCompileUseMT = true;
     bool useOQ = false;
     bool useOP = true;
-    bool recompileOnUndefinedReference = false;
+    bool recompileOnUndefinedReference = false;  // todo: still not a RT option
     bool storeStrongSymbols = true;     // TODO
-    alias dirSeparator pathSep;
+    string pathSep = dirSeparator;
     int maxModulesToCompile = int.max;
     int threadsToUse        = 1;
     bool nolink = false;
@@ -69,7 +48,8 @@ struct GlobalParams
     bool recursiveModuleScan = false;
     bool useDeps = true;
 
-    version (MultiThreaded) {
+    version (MultiThreaded) 
+    {
         bool manageAffinity = true;
     }
     else
@@ -81,8 +61,3 @@ struct GlobalParams
 }
 
 __gshared GlobalParams globalParams;
-
-//~ version (MultiThreaded) 
-//~ {
-    //~ __gshared ThreadPoolT threadPool;
-//~ }

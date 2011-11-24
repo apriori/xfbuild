@@ -15,19 +15,7 @@ private
     import std.string;
 }
 
-private 
-{
-    // todo: doesn't seem to be used
-    //~ Regex depLineRegex;
-}
-
-shared static this() 
-{
-    //defend.sim.obj.Building defend\sim\obj\Building.d 633668860572812500 defend.Main,defend.sim.Import,defend.sim.obj.House,defend.sim.obj.Citizen,defend.sim.civ.Test,
-    //depLineRegex = Regex(`([a-zA-Z0-9._]+)\ ([a-zA-Z0-9.:_\-\\/]+)\ ([0-9]+)\ (.*)`);
-}
-
-// todo: might need to be refcounted, originally a scope class
+// verify, originally scope class
 struct BuildTask
 {
     Module[string]  modules;
@@ -234,9 +222,6 @@ struct BuildTask
         
         foreach (mainFile; mainFiles)
         {
-            
-            
-            // fail:
             auto m = Module.fromFile(mainFile);
             
             

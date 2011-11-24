@@ -114,8 +114,6 @@ void compileAndTrackDeps(
             }
             else
             {
-                //~ std.path
-                //~ native path sep
                 path = normalizePath(path);
 
                 // If there's a corresponding .d file, compile that instead of trying to process a .di
@@ -197,9 +195,8 @@ void compileAndTrackDeps(
                     {
                         if (!isVerboseMsg(line) && strip(line).length)
                         {
-                            writeln(line);
                             // todo: replace with stderr
-                            //~ Stderr(line).newline;
+                            writeln(line);
                         }
                     },
                     globalParams.compilerName != "increBuild",     // ==moveObjects?
@@ -448,8 +445,6 @@ void compile(
         }
     }
 }
-
-//~ import tango.util.container.HashSet;
 
 void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
 {

@@ -4,17 +4,24 @@ private
 {
     import xfbuild.GlobalParams;
 
-    import win32.windef;
-    import win32.winuser;
-    import win32.winbase;
-    import win32.winnls;
-
     version (Windows) 
     {
+        import win32.windef;
+        import win32.winuser;
+        import win32.winbase;
+        import win32.winnls;
+        
+        // note: has to be here as in win32.winbase its protected via version(_WIN32_WINNT_ONLY),
+        // maybe it's there for a good reason though..
         extern (Windows) extern BOOL SetProcessAffinityMask(HANDLE, size_t);
         extern (Windows) extern BOOL GetProcessAffinityMask(HANDLE, size_t*, size_t*);
     }    
     
+    version (MultiThreaded)
+    {
+        import core.atomic;
+    }
+    import std.algorithm;
     import std.concurrency;
     import std.exception;
     import std.process;
@@ -32,7 +39,10 @@ struct SysError
         version (Win32)
             return GetLastError;
         else
+        {
+            import core.stdc.errno
             return errno;
+        }
     }
 
     static string lastMsg()
@@ -72,6 +82,7 @@ struct SysError
         }
         else
         {
+            import core.stdc.string;
             uint  r;
             char* pemsg;
 
@@ -93,29 +104,53 @@ struct SysError
     }
 }
 
+alias reduce!("a ~ ' ' ~ b") flatten;
+
+import std.array;
+import std.random;
+import std.format;
+import std.file;
+
+// modified from std.process.shell 
+// (nothrow, saves output)
+// note: doesn't pass environment
+string shellExecute(string cmd)
+{
+    // Generate a random filename
+    auto a = appender!string();
+    foreach (ref e; 0 .. 8)
+    {
+        formattedWrite(a, "%x", rndGen.front);
+        rndGen.popFront;
+    }
+    auto filename = a.data;
+    scope(exit) if (exists(filename)) remove(filename);
+    auto result = system(cmd ~ "> " ~ filename);
+    return readText(filename);    
+}
+
 struct Process
 {
-    string[] stdout()
-    {
-        enforce(0);
-        return null;
-    }
+    string[] args;
     
     this(bool copyEnv, string[] args)
     {
-        assert(0);
+        // todo: can't find anything in phobos to pass environment
+        // and return stdout/stderr output, OR just execute process
+        // and redirect stdout/stderr. execvpe isn't useful since 
+        // I can't redirect via ' > ' in its call.
+        this.args = args;
     }
     
-    // todo
-    void execute()
+    string execute()
     {
-        assert(0);
+        auto cmd = flatten(args);
+        return shellExecute(cmd);
     }
 
     // todo
     string toString()
     {
-        enforce(0);
         return "";
     }
 
@@ -125,18 +160,15 @@ struct Process
         int status;
     }
 
-
     // todo
     Result wait()
     {
-        enforce(0);
         return Result(0);
     }
 
     // todo
     ~this()
     {
-        enforce(0);
     }
 }
 
@@ -164,19 +196,19 @@ void checkProcessFail(Process process)
         if (name.length > 255)
             name = name[0 .. 255] ~ " [...]";
 
-        //~ throw new ProcessExecutionException(`"` ~ name ~ `" returned ` ~ to!string(result.status));
         throw new ProcessExecutionException(`"` ~ name ~ `" returned ` ~ to!string(result.status), __FILE__, __LINE__);
     }
 }
 
-void execute(Process process)
+string execute(Process process)
 {
-    process.execute();
+    return process.execute();
 
-    if (globalParams.printCommands)
-    {
-        writeln(process);
-    }
+    // todo
+    //~ if (globalParams.printCommands)
+    //~ {
+        //~ writeln(process);
+    //~ }
 }
 
 /**
@@ -194,7 +226,6 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
 
         if (ret != 0)
         {
-            //~ throw new ProcessExecutionException(`"` ~ sys ~ `" returned ` ~ to!string(ret));
             throw new ProcessExecutionException(`"` ~ sys ~ `" returned ` ~ to!string(ret), __FILE__, __LINE__);
         }
     }
@@ -265,19 +296,13 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
 
                     if (exitCode != 0)
                     {
-                        //~ throw new ProcessExecutionException(
-                                  //~ format("'%s' returned %s.", allCmd, exitCode)
-                                  //~ );                        
-                            throw new ProcessExecutionException(
-                                  format("'%s' returned %s.", allCmd, exitCode), __FILE__, __LINE__
-                                  );
+                        throw new ProcessExecutionException(
+                              format("'%s' returned %s.", allCmd, exitCode), __FILE__, __LINE__
+                              );
                     }
                 }
                 else if (rc == WAIT_FAILED)
                 {
-                    //~ throw new ProcessExecutionException(
-                              //~ format("'%s' failed with an unknown exit status.", allCmd)
-                              //~ );
                     throw new ProcessExecutionException(
                               format("'%s' failed with an unknown exit status.", allCmd), __FILE__, __LINE__
                               );
@@ -286,9 +311,6 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
             }
             else
             {
-                //~ throw new ProcessExecutionException(
-                          //~ format("Could not execute '%s'.", allCmd)
-                          //~ );
                 throw new ProcessExecutionException(
                           format("Could not execute '%s'.", allCmd), __FILE__, __LINE__
                           );
@@ -307,7 +329,14 @@ __gshared int value;
 
 void executeCompilerViaResponseFile(string compiler, string[] args, size_t affinity)
 {
-    atomicOp!"+="(value, 1);
+    version (MultiThreaded)
+    {
+        atomicOp!"+="(value, 1);
+    }
+    else
+    {
+        value += 1;
+    }
     
     string rspFile = format("xfbuild.%s.rsp", value);    
     string rspData = args.join("\n");

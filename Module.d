@@ -66,11 +66,13 @@ class Module
         if (objFile_)
             return objFile_;
 
-        return objFile_ =
+        objFile_ =
             globalParams.objPath
             ~ globalParams.pathSep
             ~ (globalParams.useOQ ? name : replace(name, ".", "-"))
             ~globalParams.objExt;
+        
+        return objFile;
     }
 
     bool modified()

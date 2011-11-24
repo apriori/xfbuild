@@ -9,7 +9,9 @@ private
 
     import std.ascii : isAlpha;
     import std.array;
+    import std.exception;
     import std.stdio;
+    import std.string;
 }
 
 /+private {
@@ -84,7 +86,7 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
 
     args ~= "-of" ~ globalParams.outputFile;
 
-    if (!globalParams.recompileOnUndefinedReference)
+    if (globalParams.recompileOnUndefinedReference)
     {
         executeCompilerViaResponseFile(
             args[0],
@@ -94,29 +96,13 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
     }
     else
     {
-        //~ this(bool copyEnv, char[][] args...)
-        // copies environment variables
         auto process = Process(true, args);
-        
-        // todo: use different execute, this one redirects to tango
-        execute(process);
+        auto output = execute(process);
 
         string currentFile   = null;
         Module currentModule = null;
 
-        version (Windows) 
-        {
-            auto procOut = process.stdout;
-        }
-        else
-        {
-            auto procOut = process.stderr;
-        }
-
-        // todo: this is basically redirect, we read from the process
-        // to see what it prints out. But we can do the same via
-        // system.
-        foreach (line; procOut)
+        foreach (line; output.splitLines)
         {
             line = strip(line);
 
@@ -154,7 +140,7 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
                     {
                         if (!currentFile || !currentModule)
                         {
-                            writefln("no file.. wtf?");
+                            writeln("no file..?");
 
                             //continue; // as i currently recompile every file anyway...
                         }
@@ -164,7 +150,7 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
                            currentModule.needRecompile = true;
                            retryCompile = true;*/
 
-                        writefln("undefined reference, will try teh full recompile :F");
+                        writeln("undefined reference, will try the full recompile");
 
                         foreach (m; modules)
                             m.needRecompile = true;
@@ -205,13 +191,14 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
         }
         catch (Exception e)
         {
-            version (Windows) {
+            version (Windows) 
+            {
                 // I don't know if Windows is affected too?
             }
             else
             {
-                // DMD somehow puts some linker errors onto stdout :S
-                Stderr.copy(process.stdout).flush;
+                // DMD somehow puts some linker errors onto stdout
+                //~ Stderr.copy(process.stdout).flush;
             }
 
             if (retryCompile && globalParams.verbose)
