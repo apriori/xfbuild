@@ -40,7 +40,7 @@ struct SysError
             return GetLastError;
         else
         {
-            import core.stdc.errno
+            import core.stdc.errno;
             return errno;
         }
     }
