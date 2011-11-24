@@ -31,3 +31,8 @@
 == What works ==
     Very simple hello_world builds, and most of my "sample code" stuff in my
     repositories. 
+
+== License ==
+    I have no idea what this project is licensed with, Tomasz Stachowiak needs
+    to be contacted first. Some code was taken from Tango (by Tomasz), that
+    code is BSD-licensed.
