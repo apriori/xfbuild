@@ -1,9 +1,0 @@
-MAJOR TODO: xfbuild doesn't understand /core/ modules
-
-xfbuild depends on existing .deps file, but this becomes a problem when building individual projects,
-as older __main symbols get put in. TODO THIS NOW.
-
-If an exe already exists that was set up with +o, fail compilation immediately or overwrite based
-on a setting.
-
-+ Stop using abort() on compilation errors.
