@@ -26,15 +26,24 @@
     Tested on XP SP3 and Lubuntu, x86.
       
 == Building xfBuild ==
-    Windows: Run build.bat
-             You can also self-build via selfbuild.bat, if that floats your boat.
+    Windows: 
+        Run build.bat
+        Alternatively use selfbuild.bat for self builds.
+        
+        Optionally, add to PATH (change this appropriately)
+            PATH=%PATH%;c:\xfBuild\
 
     Linux: 
         Run chmod a-w+x linuxbuild.sh
         Run ./linuxbuild.sh (lousy shell script, I know)
 
+        Optionally, add to PATH (change this appropriately)
+            PATH=$PATH:/home/username/dev/xfBuild/
+            export PATH
+
 == Using xfBuild ==
-    Run xfBuild to see all the options. Typically to get an executable run:
+    Run xfBuild to see all the options. 
+    To get an executable use the +o switch:
       
       xfBuild main.d +omain.exe
 
