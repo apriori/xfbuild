@@ -294,9 +294,10 @@ int main(string[] allArgs)
                     );
         parser.bind("o", (string arg)    
                     { 
+                        // todo: have to remove exe if we're regenerating
                         string outputFile = olde(arg);
                         verifyMakeFilePath(outputFile, "o", "Output");
-                        globalParams.outputFile = outputFile;            
+                        globalParams.outputFile = outputFile;
                     }
                     );
         parser.bind("x", (string arg)    { globalParams.ignore ~= olde(arg);
