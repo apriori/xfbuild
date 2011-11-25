@@ -282,7 +282,11 @@ int main(string[] allArgs)
         parser.bind("C", (string arg)    { globalParams.objExt = olde(arg);
                     }
                     );                                                                                                  // HACK: should use profiles/configs instead
-        parser.bind("O", (string arg)    { globalParams.objPath = olde(arg);
+        parser.bind("O", (string arg)    
+                    { 
+                        string objPath = olde(arg);
+                        verifyMakeFilePath(objPath, "O", "Objects");
+                        globalParams.objPath = objPath;
                     }
                     );
         parser.bind("D", (string arg)    

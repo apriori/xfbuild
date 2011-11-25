@@ -1,3 +1,3 @@
 @echo off
 del /q xfbuild.exe
-xfbuild +obin\xfbuild.exe -debug -version=MultiThreaded -I.. -I..\WindowsAPI\ -Idcollections-2.0c Main.d
+xfbuild +oxfbuild.exe -debug -version=MultiThreaded -I.. -I..\WindowsAPI\ -Idcollections-2.0c Main.d && copy xfbuild.exe bin\xfbuild.exe
