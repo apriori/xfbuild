@@ -72,7 +72,7 @@
     David Nadlinger
     Mathias Baumann
     
-    (Note: If your name is missing here, let me know!)
+    (Note: If your name is missing here, let me know)
     
 == Links ==
     D2 Programming Language homepage: http://d-programming-language.org/
