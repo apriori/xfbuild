@@ -1,0 +1,2 @@
+- 25th November 2011
+    Added autogeneration of paths for +o and +D flags, highly experimental.

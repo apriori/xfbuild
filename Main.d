@@ -282,13 +282,9 @@ int main(string[] allArgs)
         parser.bind("C", (string arg)    { globalParams.objExt = olde(arg);
                     }
                     );                                                                                                  // HACK: should use profiles/configs instead
-        parser.bind("O", (string arg)    
-                    { 
-                        string objPath = olde(arg);
-                        verifyMakeFilePath(objPath, "O", "Objects");
-                        globalParams.objPath = objPath;
+        parser.bind("O", (string arg)    { globalParams.objPath = olde(arg);
                     }
-                    );
+                    );                    
         parser.bind("D", (string arg)    
                     {
                         string depsPath = olde(arg);
@@ -296,7 +292,11 @@ int main(string[] allArgs)
                         globalParams.depsPath = depsPath;
                     }
                     );
-        parser.bind("o", (string arg)    { globalParams.outputFile = olde(arg);
+        parser.bind("o", (string arg)    
+                    { 
+                        string outputFile = olde(arg);
+                        verifyMakeFilePath(outputFile, "o", "Output");
+                        globalParams.outputFile = outputFile;            
                     }
                     );
         parser.bind("x", (string arg)    { globalParams.ignore ~= olde(arg);
