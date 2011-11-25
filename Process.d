@@ -251,7 +251,7 @@ void executeCompilerViaResponseFile(string compiler, string[] args, size_t affin
     string rspData = args.join("\n");
 
     /+if (globalParams.verbose) {
-            Stdout.formatln("running the compiler with:\n%s", rspData);
+            writefln("running the compiler with:\n%s", rspData);
        }+/
     auto file = File(rspFile, "w");
     file.write(rspData);
