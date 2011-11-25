@@ -7,7 +7,7 @@
     xfBuild was ported to D2 by Andrej Mitrovic.
     Port Project Homepage: http://github.com/AndrejMitrovic/xfBuild
     
-    ** This is an alpha release, expect bugs. File them when you find them! **
+    ** This is an alpha release, expect bugs. File them if you find them! **
 
 == Building Requirements ==
     - DMD v2.056+ compiler. Download DMD from: http://www.digitalmars.com/d/download.html
@@ -52,13 +52,28 @@
     repositories. 
 
 == License ==
-    I have no idea what this project is licensed with, Tomasz Stachowiak needs
-    to be contacted first. Some code was taken from Tango (by Tomasz), that
-    code is BSD-licensed.
+    xfBuild is Boost-licensed, acknowlidged by the original author, Tomasz Stachowiak.
+    See accompanying file LICENSE_1_0.txt or copy at
+    http://www.boost.org/LICENSE_1_0.txt
 
 == Acknowledgments ==
-    Special thanks to Tomasz Stachowiak for making xfBuild.
+    Special thanks to Tomasz Stachowiak for creating xfBuild and allowing me
+    to license it under Boost.
+    Thanks to Steven Schveighoffer for making dcollections 2.0.
 
+== Contributors ==
+    Tomasz Stachowiak
+    leod
+    Benjamin Saunders
+    Daniel Mierswa
+    Robert Clipsham
+    Vincenzo Ampolo
+    digited
+    David Nadlinger
+    Mathias Baumann
+    
+    (Note: If your name is missing here, let me know!)
+    
 == Links ==
     D2 Programming Language homepage: http://d-programming-language.org/
     xfBuild Original Homepage: http://bitbucket.org/h3r3tic/xfbuild

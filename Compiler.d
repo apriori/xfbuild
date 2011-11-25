@@ -1,3 +1,9 @@
+/+
+ +           Copyright Andrej Mitrovic 2011.
+ +  Distributed under the Boost Software License, Version 1.0.
+ +     (See accompanying file LICENSE_1_0.txt or copy at
+ +           http://www.boost.org/LICENSE_1_0.txt)
+ +/
 module xfbuild.Compiler;
 
 private 
@@ -315,17 +321,6 @@ void compile(
     void execute(string[] args, size_t affinity)
     {
         executeCompilerViaResponseFile(args[0], args[1..$], affinity);
-
-        /+scope process = new Process(true, args);
-            // todo: this one executes tango, replace
-           .execute(process);
-           foreach(line; new Lines!(char)(process.stdout)) {
-                stdout(strip(line));
-           }
-
-           Stderr.copy(process.stderr).flush;
-           checkProcessFail(process);
-           //writefln("process finished");+/
     }
 
     if (compileArray.length)

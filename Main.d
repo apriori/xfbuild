@@ -1,9 +1,16 @@
+/+
+ +           Copyright Andrej Mitrovic 2011.
+ +  Distributed under the Boost Software License, Version 1.0.
+ +     (See accompanying file LICENSE_1_0.txt or copy at
+ +           http://www.boost.org/LICENSE_1_0.txt)
+ +/
 module xfbuild.Main;
 
 private 
 {
     import xfbuild.MT;
     import xfbuild.BuildTask;
+    import xfbuild.Misc;
     import xfbuild.Compiler : CompilerError;
     import xfbuild.GlobalParams;
     import xfbuild.BuildException;
@@ -101,8 +108,6 @@ Environment Variables:
     exit(status);
 }
 
-// the old args parser in Tango got deprecated and the new one is too
-// fancy for our purposes so here's a quickly whipped up one :P
 struct ArgParser
 {
     void delegate(string) err;
@@ -280,7 +285,11 @@ int main(string[] allArgs)
         parser.bind("O", (string arg)    { globalParams.objPath = olde(arg);
                     }
                     );
-        parser.bind("D", (string arg)    { globalParams.depsPath = olde(arg);
+        parser.bind("D", (string arg)    
+                    {
+                        string depsPath = olde(arg);
+                        verifyMakeFilePath(depsPath, "D", "Deps");
+                        globalParams.depsPath = depsPath;
                     }
                     );
         parser.bind("o", (string arg)    { globalParams.outputFile = olde(arg);

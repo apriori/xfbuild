@@ -1,6 +1,12 @@
+/+
+ +           Copyright Andrej Mitrovic 2011.
+ +  Distributed under the Boost Software License, Version 1.0.
+ +     (See accompanying file LICENSE_1_0.txt or copy at
+ +           http://www.boost.org/LICENSE_1_0.txt)
+ +/
 module xfbuild.BuildTask;
 
-private 
+private
 {
     import xfbuild.GlobalParams;
     import xfbuild.Module;
@@ -30,9 +36,8 @@ struct BuildTask
         this.mainFiles   = mainFiles;
 
         //profile!("BuildTask.readDeps")({
-        
+
         readDeps();
-        
 
         //});
     }
@@ -84,125 +89,127 @@ struct BuildTask
         //});
     }
 
+    // refactor this hairball
     private void readDeps()
     {
-        
         if (globalParams.useDeps && std.file.exists(globalParams.depsPath))
         {
+            auto depsPath = globalParams.depsPath;
             
-            auto file = File(globalParams.depsPath, "r");
-            
-            foreach (aLine; file.byLine)
+            if (depsPath.exists && std.file.getSize(depsPath) > 0)
             {
-                string line = strip(aLine).idup;
+                auto file = File(depsPath, "r");
+                foreach (aLine; file.byLine)
+                {
+                    string line = strip(aLine).idup;
 
-                if (!line.length)
-                    continue;
+                    if (!line.length)
+                        continue;
 
-                /*auto firstSpace = TextUtil.locate(line, ' ');
-                   auto thirdSpace = TextUtil.locatePrior(line, ' ');
-                   auto secondSpace = TextUtil.locatePrior(line, ' ', thirdSpace);
+                    /*auto firstSpace = TextUtil.locate(line, ' ');
+                       auto thirdSpace = TextUtil.locatePrior(line, ' ');
+                       auto secondSpace = TextUtil.locatePrior(line, ' ', thirdSpace);
 
-                   auto name = line[0 .. firstSpace];
-                   auto path = line[firstSpace + 1 .. secondSpace];
-                   auto time = to!long(line[secondSpace + 1 .. thirdSpace]);
-                   auto deps = line[thirdSpace + 1 .. $];*/
+                       auto name = line[0 .. firstSpace];
+                       auto path = line[firstSpace + 1 .. secondSpace];
+                       auto time = to!long(line[secondSpace + 1 .. thirdSpace]);
+                       auto deps = line[thirdSpace + 1 .. $];*/
 
-                /+if(!depLineRegex.test(line))
+                    /+if(!depLineRegex.test(line))
+                            throw new Exception("broken .deps file (line: " ~ line ~ ")");
+
+                       auto name = depLineRegex[1];
+                       auto path = depLineRegex[2];
+                       auto time = to!long(depLineRegex[3]);
+                       auto deps = depLineRegex[4];+/
+
+                    auto arr = line.decomposeString(cast(string)null, ` `, null, ` `, null, ` `, null);
+
+                    if (arr is null)
+                    {
+                        arr = line.decomposeString(cast(string)null, ` `, null, ` `, null);
+                    }
+
+                    if (arr is null)
                         throw new Exception("broken .deps file (line: " ~ line ~ ")");
 
-                   auto name = depLineRegex[1];
-                   auto path = depLineRegex[2];
-                   auto time = to!long(depLineRegex[3]);
-                   auto deps = depLineRegex[4];+/
+                    auto name = arr[0];
+                    auto path = arr[1];
+                    long time;
 
-                auto arr = line.decomposeString(cast(string)null, ` `, null, ` `, null, ` `, null);
+                    try
+                    {
+                        time = to!long (arr[2]);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("broken .deps file (line: " ~ line ~ ")");
+                    }
 
-                if (arr is null)
-                {
-                    arr = line.decomposeString(cast(string)null, ` `, null, ` `, null);
-                }
+                    auto deps = arr.length > 3 ? arr[3] : null;
 
-                if (arr is null)
-                    throw new Exception("broken .deps file (line: " ~ line ~ ")");
-
-                auto name = arr[0];
-                auto path = arr[1];
-                long time;
-                
-                try
-                {
-                    time = to!long(arr[2]);
-                }
-                catch (Exception e)
-                {
-                    throw new Exception("broken .deps file (line: " ~ line ~ ")");
-                }
-                
-                auto deps = arr.length > 3 ? arr[3] : null;
-
-                if (isIgnored(name))
-                {
-                    if (globalParams.verbose)
-                        writeln(name ~ " is ignored");
-
-                    continue;
-                }
-
-                //Stdout(time, deps).newline;
-
-                if (!std.file.exists(path))
-                    continue;
-
-                auto m = new Module;
-                m.name         = name;
-                m.path         = path;
-                m.timeDep      = time;
-                m.timeModified = timeLastModified(path).stdTime;
-
-                if (m.modified && !m.isHeader)
-                {
-                    if (globalParams.verbose)
-                        writefln("%s was modified", m.name);
-
-                    m.needRecompile = true;
-
-                    //moduleStack ~= m;
-                }
-                else if (globalParams.compilerName != "increBuild")
-                {
-                    if (!std.file.exists(m.objFile))
+                    if (isIgnored(name))
                     {
                         if (globalParams.verbose)
-                            writefln("%s's obj file was removed", m.name);
+                            writeln(name ~ " is ignored");
+
+                        continue;
+                    }
+
+                    //Stdout(time, deps).newline;
+
+                    if (!std.file.exists(path))
+                        continue;
+
+                    auto m = new Module;
+                    m.name         = name;
+                    m.path         = path;
+                    m.timeDep      = time;
+                    m.timeModified = timeLastModified(path).stdTime;
+
+                    if (m.modified && !m.isHeader)
+                    {
+                        if (globalParams.verbose)
+                            writefln("%s was modified", m.name);
 
                         m.needRecompile = true;
 
                         //moduleStack ~= m;
                     }
-                }
-
-                if (deps)
-                {
-                    foreach (dep; splitter(deps, ","))
+                    else if (globalParams.compilerName != "increBuild")
                     {
-                        if (!dep.length)
-                            continue;
-
-                        if (isIgnored(dep))
+                        if (!std.file.exists(m.objFile))
                         {
                             if (globalParams.verbose)
-                                writeln(dep ~ " is ignored");
+                                writefln("%s's obj file was removed", m.name);
 
-                            continue;
+                            m.needRecompile = true;
+
+                            //moduleStack ~= m;
                         }
-
-                        m.depNames ~= dep;
                     }
+
+                    if (deps)
+                    {
+                        foreach (dep; splitter(deps, ","))
+                        {
+                            if (!dep.length)
+                                continue;
+
+                            if (isIgnored(dep))
+                            {
+                                if (globalParams.verbose)
+                                    writeln(dep ~ " is ignored");
+
+                                continue;
+                            }
+
+                            m.depNames ~= dep;
+                        }
+                    }
+
+                    modules[name] = m;
                 }
-
-
-                modules[name] = m;
             }
 
             foreach (m; modules)
@@ -218,12 +225,10 @@ struct BuildTask
             }
         }
 
-        
         foreach (mainFile; mainFiles)
         {
             auto m = Module.fromFile(mainFile);
-            
-            
+
             if (m.name !in modules)
             {
                 modules[m.name] = m;
@@ -237,7 +242,7 @@ struct BuildTask
     private void writeDeps()
     {
         auto file = File(globalParams.depsPath, "w");
-        
+
         foreach (m; modules)
         {
             if (m.path.length > 0)

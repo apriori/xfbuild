@@ -1,3 +1,9 @@
+/+
+ +           Copyright Andrej Mitrovic 2011.
+ +  Distributed under the Boost Software License, Version 1.0.
+ +     (See accompanying file LICENSE_1_0.txt or copy at
+ +           http://www.boost.org/LICENSE_1_0.txt)
+ +/
 module xfbuild.Process;
 
 private
@@ -211,12 +217,6 @@ string execute(Process process)
     //~ }
 }
 
-/**
- *  Loosely based on tango.sys.Process with the following license:
-          copyright:   Copyright (c) 2006 Juan Jose Comellas. All rights reserved
-          license:     BSD style: $(LICENSE)
-          author:      Juan Jose Comellas <juanjo@comellas.com.ar>
- */
 void executeAndCheckFail(string[] cmd, size_t affinity)
 {
     void runNoAffinity()
@@ -230,99 +230,8 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
         }
     }
 
-    version (Windows)
-    {
-        if (!globalParams.manageAffinity)
-        {
-            runNoAffinity();
-        }
-        else
-        {
-            auto  allCmd = cmd.join(" ");
-            char* csys   = toUTFz!(char*)(allCmd);
-
-            STARTUPINFOA startup;
-
-            startup.cb         = STARTUPINFO.sizeof;
-            startup.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
-            startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-            startup.hStdError  = GetStdHandle(STD_ERROR_HANDLE);
-
-            PROCESS_INFORMATION info;
-
-            if (CreateProcessA(
-                    null,                               // lpApplicationName
-                    csys,
-                    null,                               // lpProcessAttributes
-                    null,                               // lpThreadAttributes
-                    true,                               // bInheritHandles
-                    CREATE_SUSPENDED,
-                    null,                               // lpEnvironment
-                    null,                               // lpCurrentDirectory
-                    &startup,                           // lpStartupInfo
-                    &info
-                    ))
-            {
-                if (!SetProcessAffinityMask(info.hProcess, affinity))
-                {
-                    throw new Exception(
-                              format(
-                                  "SetProcessAffinityMask(%s) failed: %s",
-                                  affinity,
-                                  SysError.lastMsg
-                                  )
-                              );
-                }
-
-                ResumeThread(info.hThread);
-                CloseHandle(info.hThread);
-
-                DWORD rc;
-                DWORD exitCode;
-
-                // We clean up the process related data and set the _running
-                // flag to false once we're done waiting for the process to
-                // finish.
-                scope (exit)
-                {
-                    CloseHandle(info.hProcess);
-                }
-
-                rc = WaitForSingleObject(info.hProcess, INFINITE);
-
-                if (rc == WAIT_OBJECT_0)
-                {
-                    GetExitCodeProcess(info.hProcess, &exitCode);
-
-                    if (exitCode != 0)
-                    {
-                        throw new ProcessExecutionException(
-                              format("'%s' returned %s.", allCmd, exitCode), __FILE__, __LINE__
-                              );
-                    }
-                }
-                else if (rc == WAIT_FAILED)
-                {
-                    throw new ProcessExecutionException(
-                              format("'%s' failed with an unknown exit status.", allCmd), __FILE__, __LINE__
-                              );
-                    
-                }
-            }
-            else
-            {
-                throw new ProcessExecutionException(
-                          format("Could not execute '%s'.", allCmd), __FILE__, __LINE__
-                          );
-                
-            }
-        }
-    }
-    else
-    {
-        // TODO: affinity
-        runNoAffinity();
-    }
+    // todo: affinity
+    runNoAffinity();
 }
 
 __gshared int value;

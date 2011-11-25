@@ -1,13 +1,78 @@
+/+
+ +           Copyright Andrej Mitrovic 2011.
+ +  Distributed under the Boost Software License, Version 1.0.
+ +     (See accompanying file LICENSE_1_0.txt or copy at
+ +           http://www.boost.org/LICENSE_1_0.txt)
+ +/
 module xfbuild.Misc;
+
+import xfbuild.BuildException;
 
 import std.algorithm : startsWith;
 import std.ascii     : isWhite;
-import std.string : format;
+import std.string : format, stripLeft;
 alias isWhite isSpace;
-import std.string : stripLeft;
 alias stripLeft triml;
-
 import std.algorithm : countUntil;
+import std.exception;
+import std.path;
+import std.file;
+
+// complicated beast..
+void verifyMakeFilePath(string filePath, string option, string name)
+{
+    // syntactic verification
+    auto last = filePath[$-1];
+    if (last == '\\' || last == '/')
+    {
+        throw new ParseException(format("%s must be a file path, not a directory: \"+%s=%s\"", 
+                                        name, 
+                                        option, 
+                                        filePath),
+                                 __FILE__, __LINE__);
+    }
+    
+    if (!isValidFilename(filePath.baseName))
+    {
+        throw new ParseException(format("%s file path contains invalid characters: \"+%s=%s\"", 
+                                        name, 
+                                        option, 
+                                        filePath),
+                                 __FILE__, __LINE__);
+    }
+    
+    // existing dir/file scenario
+    if (filePath.exists)
+    {
+        enforce(!filePath.isDir, 
+                new ParseException(format("%s file path is an existing directory: \"+%s=%s\"", 
+                                          name, 
+                                          option, 
+                                          filePath), 
+                                   __FILE__, __LINE__));
+        
+        // will overwrite file
+        return;  
+    }
+    else
+    {
+        try
+        {
+            auto dirname = filePath.absolutePath.dirName;
+            if (!dirname.exists)
+            {
+                mkdirRecurse(dirname);
+            }
+        }
+        catch (FileException ex)
+        {
+            throw new ParseException(format("Failed to create folder for the %s file:\n%s", 
+                                            name, 
+                                            ex.toString),
+                                     __FILE__, __LINE__);
+        }
+    }
+}
 
 size_t locatePattern(string source, string match, size_t start = 0)
 {

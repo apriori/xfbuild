@@ -133,11 +133,10 @@ class Module
         m.path         = path;
         m.timeModified = timeLastModified(m.path).stdTime;
         
-        // @BUG@ Workaround: Phobos doesn't fail opening empty file
-        // but keeps it closed, making byLine throw.
+        // @BUG@ Workaround: Phobos has issues reading empty files
         if (std.file.getSize(m.path) == 0)
         {
-            throw new Exception(format("module '%s' is empty", path));
+            throw new Exception(format("module '%s' is empty", path), __FILE__, __LINE__);
         }
         
         auto file = File(m.path, "r");
