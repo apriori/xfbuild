@@ -41,6 +41,11 @@
             PATH=$PATH:/home/username/dev/xfBuild/
             export PATH
 
+    Self-Build Note: 
+        You might get file overwrite errors if you try to build xfBuild
+        with itself. Make sure you're not outputting over the executable
+        you're already running.
+
 == Using xfBuild ==
     Run xfBuild to see all the options. 
     To get an executable use the +o switch:
