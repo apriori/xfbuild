@@ -124,7 +124,6 @@ version (MultiThreaded)
         }
     }
 
-
     MTFor mtFor(TaskPool taskPool, int from, int to, int numPerTask = 0)
     {
         return MTFor(taskPool, from, to, numPerTask);

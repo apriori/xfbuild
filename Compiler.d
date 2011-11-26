@@ -1,5 +1,6 @@
 /+
  +           Copyright Andrej Mitrovic 2011.
+ +       Copyright Tomasz Stachowiak 2009 - 2011.
  +  Distributed under the Boost Software License, Version 1.0.
  +     (See accompanying file LICENSE_1_0.txt or copy at
  +           http://www.boost.org/LICENSE_1_0.txt)
@@ -41,7 +42,6 @@ bool isVerboseMsg(string msg)
         || msg.startsWith(`code`);
 }
 
-// drey todo: replace with shared static this, and for all other modules
 shared static this() 
 {
     /+importSemanticStartRegex = Regex(`^Import::semantic\('([a-zA-Z0-9._]+)'\)$`);
@@ -67,7 +67,7 @@ class CompilerError : BuildException
 // TODO: Cache the escaped paths?
 private string unescapePath(string path)
 {
-    // drey todo: replace with .reserve
+    // todo: replace with .reserve
     char[] res = (new char[path.length])[0..0];
 
     for (int i = 0; i < path.length; ++i)
