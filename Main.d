@@ -288,7 +288,7 @@ int main(string[] allArgs)
         parser.bind("D", (string arg)    
                     {
                         string depsPath = olde(arg);
-                        verifyMakeFilePath(depsPath, "D", "Deps");
+                        verifyMakeFilePath(depsPath, "+D");
                         globalParams.depsPath = depsPath;
                     }
                     );
@@ -296,7 +296,7 @@ int main(string[] allArgs)
                     { 
                         // todo: have to remove exe if we're regenerating
                         string outputFile = olde(arg);
-                        verifyMakeFilePath(outputFile, "o", "Output");
+                        verifyMakeFilePath(outputFile, "+o");
                         globalParams.outputFile = outputFile;
                     }
                     );

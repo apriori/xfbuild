@@ -18,59 +18,80 @@ import std.exception;
 import std.path;
 import std.file;
 
-// complicated beast..
-void verifyMakeFilePath(string filePath, string option, string name)
+bool isDirPath(string filePath)
 {
-    // syntactic verification
     auto last = filePath[$-1];
-    if (last == '\\' || last == '/')
-    {
-        throw new ParseException(format("%s must be a file path, not a directory: \"+%s=%s\"", 
-                                        name, 
-                                        option, 
-                                        filePath),
-                                 __FILE__, __LINE__);
-    }
+    return (last == '\\' || last == '/');
+}
+
+void verifyMakeFilePath(string filePath, string option)
+{
+    // std.path is missing isFilePath/isDirPath
+    enforceEx!ParseException(!filePath.isDirPath,
+                             format("%s option must be a file path, not a directory: `%s`", 
+                                     option, 
+                                     filePath));
     
-    if (!isValidFilename(filePath.baseName))
-    {
-        throw new ParseException(format("%s file path contains invalid characters: \"+%s=%s\"", 
-                                        name, 
-                                        option, 
-                                        filePath),
-                                 __FILE__, __LINE__);
-    }
-    
-    // existing dir/file scenario
-    if (filePath.exists)
-    {
-        enforce(!filePath.isDir, 
-                new ParseException(format("%s file path is an existing directory: \"+%s=%s\"", 
-                                          name, 
-                                          option, 
-                                          filePath), 
-                                   __FILE__, __LINE__));
-        
-        // will overwrite file
-        return;  
-    }
-    else
+    // check invalid chars
+    enforceEx!ParseException(filePath.baseName.isValidFilename,
+                             format("%s option contains invalid characters: `%s`", 
+                                    option, 
+                                    filePath));
+
+    auto dirname = filePath.absolutePath.dirName;
+    if (!dirname.exists)
     {
         try
-        {
-            auto dirname = filePath.absolutePath.dirName;
-            if (!dirname.exists)
-            {
-                mkdirRecurse(dirname);
-            }
+        {        
+            mkdirRecurse(dirname);
         }
         catch (FileException ex)
         {
-            throw new ParseException(format("Failed to create folder for the %s file:\n%s", 
-                                            name, 
-                                            ex.toString),
-                                     __FILE__, __LINE__);
+            enforceEx!ParseException(0, format("Failed to create output folder for %s option:\n%s", 
+                                               option,
+                                               ex.toString));
         }
+    }
+}
+
+unittest
+{
+    import std.file;
+    import std.path;
+    import std.range;
+    
+    auto _tempdir = buildPath(absolutePath("."), "unittest_temp");
+    auto workdir = buildPath(_tempdir, "subdir");
+    
+    mkdirRecurse(_tempdir);
+    scope(exit)
+    {
+        rmdirRecurse(_tempdir);
+    }
+    
+    // todo: autogenerate? could be many different valid filenames..
+    enum validNames =  
+    [   
+        `deps`,
+        `deps.dep`,
+        `out/deps.dep`,
+        `../deps`,
+        `../deps.dep`,
+    ];
+    
+    enum invalidNames =  
+    [   
+        `deps/`,
+        `out/deps/`,
+        `../deps/`,
+    ];
+    
+    foreach (path1, path2; lockstep(validNames, invalidNames))
+    {
+        auto valid   = buildPath(workdir, path1);
+        auto invalid = buildPath(workdir, path2);
+        verifyMakeFilePath(valid, "+D");
+        assertThrown!ParseException(verifyMakeFilePath(invalid, "") , invalid);
     }
 }
 
