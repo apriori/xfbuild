@@ -96,6 +96,8 @@ unittest
 
 size_t locatePattern(string source, string match, size_t start = 0)
 {
+    // source can be len 0
+    start && enforce(start < source.length);
     return countUntil(source[start .. $], match);
 }
 
@@ -118,10 +120,8 @@ string[] decomposeString(string str, string[] foo ...)
                 auto delim = foo[fi + 1];
                 assert(delim !is null);
 
-                // locatePattern (source, match, start);       // find pattern
                 int l = str.locatePattern(delim);
-
-                if (l == str.length || l == -1)
+                if (l == -1)
                 {
                     return null;  // fail
                 }
