@@ -69,7 +69,6 @@ unittest
         rmdirRecurse(_tempdir);
     }
     
-    // todo: autogenerate? could be many different valid filenames..
     enum validNames =  
     [   
         `deps`,
