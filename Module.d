@@ -1,10 +1,13 @@
+/+
+ +           Copyright Andrej Mitrovic 2011.
+ +  Distributed under the Boost Software License, Version 1.0.
+ +     (See accompanying file LICENSE_1_0.txt or copy at
+ +           http://www.boost.org/LICENSE_1_0.txt)
+ +/
 module xfbuild.Module;
 
-private 
-{
-    import xfbuild.GlobalParams;
-    import xfbuild.Misc;
-}
+import xfbuild.GlobalParams;
+import xfbuild.Misc;
 
 import std.string : lastIndexOf, splitLines, strip;
 import std.algorithm : min;

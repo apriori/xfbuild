@@ -6,35 +6,29 @@
  +/
 module xfbuild.Compiler;
 
-private 
-{
-    import xfbuild.GlobalParams;
-    import xfbuild.Module;
-    import xfbuild.Process;
-    import xfbuild.Misc;
-    import xfbuild.BuildException;
+import xfbuild.GlobalParams;
+import xfbuild.Module;
+import xfbuild.Process;
+import xfbuild.Misc;
+import xfbuild.BuildException;
 
-    import dcollections.HashSet;
-    
-    import std.parallelism;
-    import std.array;
-    import std.file;
-    import std.stdio;
-    
-    version (MultiThreaded) 
-    {
-        import xfbuild.MT;
-    }
+import dcollections.HashSet;
+
+import std.parallelism;
+import std.array;
+import std.file;
+import std.stdio;
+
+version (MultiThreaded) 
+{
+    import xfbuild.MT;
 }
 
-private 
-{
-    /+Regex	importSemanticStartRegex;
-       Regex	importSemanticEndRegex;+/
+/+Regex	importSemanticStartRegex;
+   Regex	importSemanticEndRegex;+/
 
-    //Regex	moduleSemantic1Regex;
-    //Regex	verboseRegex;
-}
+//Regex	moduleSemantic1Regex;
+//Regex	verboseRegex;
 
 bool isVerboseMsg(string msg) 
 {

@@ -6,37 +6,35 @@
  +/
 module xfbuild.Process;
 
-private
-{
-    import xfbuild.GlobalParams;
+import xfbuild.GlobalParams;
 
-    version (Windows) 
-    {
-        import win32.windef;
-        import win32.winuser;
-        import win32.winbase;
-        import win32.winnls;
-        
-        // note: has to be here as in win32.winbase its protected via version(_WIN32_WINNT_ONLY),
-        // maybe it's there for a good reason though..
-        extern (Windows) extern BOOL SetProcessAffinityMask(HANDLE, size_t);
-        extern (Windows) extern BOOL GetProcessAffinityMask(HANDLE, size_t*, size_t*);
-    }    
+version (Windows) 
+{
+    import win32.windef;
+    import win32.winuser;
+    import win32.winbase;
+    import win32.winnls;
     
-    version (MultiThreaded)
-    {
-        import core.atomic;
-    }
-    import std.algorithm;
-    import std.concurrency;
-    import std.exception;
-    import std.process;
-    import std.stdio;
-    import std.string;
-    import std.array;
-    import std.utf;
-    import std.conv : to;
+    // note: has to be here as in win32.winbase it's protected via version(_WIN32_WINNT_ONLY),
+    // maybe it's there for a good reason ..
+    extern (Windows) extern BOOL SetProcessAffinityMask(HANDLE, size_t);
+    extern (Windows) extern BOOL GetProcessAffinityMask(HANDLE, size_t*, size_t*);
+}    
+
+version (MultiThreaded)
+{
+    import core.atomic;
 }
+
+import std.algorithm;
+import std.concurrency;
+import std.exception;
+import std.process;
+import std.stdio;
+import std.string;
+import std.array;
+import std.utf;
+import std.conv : to;
 
 struct SysError
 {

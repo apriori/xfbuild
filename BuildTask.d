@@ -6,20 +6,17 @@
  +/
 module xfbuild.BuildTask;
 
-private
-{
-    import xfbuild.GlobalParams;
-    import xfbuild.Module;
-    import xfbuild.Compiler;
-    import xfbuild.Linker;
-    import xfbuild.Misc;
+import xfbuild.GlobalParams;
+import xfbuild.Module;
+import xfbuild.Compiler;
+import xfbuild.Linker;
+import xfbuild.Misc;
 
-    import std.algorithm;
-    import std.file;
-    import std.conv;
-    import std.stdio;
-    import std.string;
-}
+import std.algorithm;
+import std.file;
+import std.conv;
+import std.stdio;
+import std.string;
 
 // verify, originally scope class
 struct BuildTask

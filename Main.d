@@ -6,27 +6,24 @@
  +/
 module xfbuild.Main;
 
-private 
-{
-    import xfbuild.MT;
-    import xfbuild.BuildTask;
-    import xfbuild.Misc;
-    import xfbuild.Compiler : CompilerError;
-    import xfbuild.GlobalParams;
-    import xfbuild.BuildException;
-    import xfbuild.Process;
+import xfbuild.MT;
+import xfbuild.BuildTask;
+import xfbuild.Misc;
+import xfbuild.Compiler : CompilerError;
+import xfbuild.GlobalParams;
+import xfbuild.BuildException;
+import xfbuild.Process;
 
-    import std.algorithm;
-    import std.array;
-    import std.conv;
-    import std.stdio;
-    import std.file;
-    import std.path;
-    import std.c.process;
-    import std.process;
-    import std.parallelism : totalCPUs;
-    import std.cpuid : threadsPerCPU;
-}
+import std.algorithm;
+import std.array;
+import std.conv;
+import std.stdio;
+import std.file;
+import std.path;
+import std.c.process;
+import std.process;
+import std.parallelism : totalCPUs;
+import std.cpuid : threadsPerCPU;
 
 void printHelpAndQuit(int status)
 {

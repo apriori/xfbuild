@@ -1,20 +1,23 @@
+/+
+ +           Copyright Andrej Mitrovic 2011.
+ +  Distributed under the Boost Software License, Version 1.0.
+ +     (See accompanying file LICENSE_1_0.txt or copy at
+ +           http://www.boost.org/LICENSE_1_0.txt)
+ +/
 module xfbuild.Linker;
 
-private 
-{
-    import xfbuild.GlobalParams;
-    import xfbuild.Module;
-    import xfbuild.Process;
-    import xfbuild.Misc;
+import xfbuild.GlobalParams;
+import xfbuild.Module;
+import xfbuild.Process;
+import xfbuild.Misc;
 
-    import std.ascii : isAlpha;
-    import std.array;
-    import std.exception;
-    import std.stdio;
-    import std.string;
-}
+import std.algorithm;
+import std.ascii : isAlpha;
+import std.array;
+import std.exception;
+import std.stdio;
 
-/+private {
+/+ {
         Regex linkerFileRegex;
    }
 
@@ -23,35 +26,17 @@ private
         //linkerFileRegex = Regex(`([a-zA-Z0-9.:_\-\\/]+)\(.*\)`);
    }+/
 
-import std.string;
-
-bool contains(string where, char what)
-{
-    return where.indexOf(what) != -1;
-}
-
 bool isValidObjFileName(string f)
 {
     foreach (c; f)
     {
-        if (!isAlpha(c) && !(`.:_-\/`.contains(c)))
+        if (!isAlpha(c) && !(`.:_-\/`.canFind(c)))
         {
             return false;
         }
     }
 
     return true;
-}
-
-bool contains(string[] haystack, string needle)
-{
-    foreach (val; haystack)
-    {
-        if (val == needle)
-            return true;
-    }
-    
-    return false;
 }
 
 bool link(ref Module[string] modules, string[] mainFiles = null)
@@ -78,7 +63,7 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
 
     foreach (k, m; modules)
     {
-        if (m.isHeader || contains(mainFiles, m.path))
+        if (m.isHeader || canFind(mainFiles, m.path))
             continue;
 
         args ~= m.objFile;
