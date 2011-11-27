@@ -96,8 +96,14 @@ struct BuildTask
             
             if (depsPath.exists && std.file.getSize(depsPath) > 0)
             {
-                auto file = File(depsPath, "r");
-                foreach (aLine; file.byLine)
+                auto depsFile = File(depsPath, "r");
+                scope(exit)
+                {
+                    // @BUG@ 7022 workaround
+                    depsFile.close();
+                }                
+                
+                foreach (aLine; depsFile.byLine)
                 {
                     string line = strip(aLine).idup;
 
@@ -137,7 +143,7 @@ struct BuildTask
 
                     try
                     {
-                        time = to!long (arr[2]);
+                        time = to!long(arr[2]);
                     }
                     catch (Exception e)
                     {
@@ -239,26 +245,31 @@ struct BuildTask
 
     private void writeDeps()
     {
-        auto file = File(globalParams.depsPath, "w");
+        auto depsFile = File(globalParams.depsPath, "w");
+        scope(exit)
+        {
+            // @BUG@ 7022 workaround
+            depsFile.close();
+        }
 
         foreach (m; modules)
         {
             if (m.path.length > 0)
             {
-                file.write(m.name);
-                file.write(" ");
-                file.write(m.path);
-                file.write(" ");
-                file.write(to!string(m.timeDep));
-                file.write(" ");
+                depsFile.write(m.name);
+                depsFile.write(" ");
+                depsFile.write(m.path);
+                depsFile.write(" ");
+                depsFile.write(to!string(m.timeDep));
+                depsFile.write(" ");
 
                 foreach (d; m.deps)
                 {
-                    file.write(d.name);
-                    file.write(",");
+                    depsFile.write(d.name);
+                    depsFile.write(",");
                 }
 
-                file.write("\n");
+                depsFile.writeln;
             }
         }
     }

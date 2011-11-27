@@ -416,7 +416,19 @@ int main(string[] allArgs)
                 buildTask.removeObjFiles();
 
             if (removeDeps)
-                std.file.remove(globalParams.depsPath);
+            {
+                try 
+                {
+                    if (std.file.exists(globalParams.depsPath))
+                    {
+                        std.file.remove(globalParams.depsPath); 
+                    }
+                }
+                catch (Exception exc) 
+                { 
+                    writeln("Couldn't remove deps file."); 
+                }
+            }
 
             if (quit)
                 return 0;

@@ -8,4 +8,4 @@ set "WINVERSIONS=-version=Unicode -version=WIN32_WINNT_ONLY -version=WindowsNTon
 
 set "VERSION=-version=MultiThreaded"
 
-dmd -ofbin\xfbuild.exe -g -w -wi %MODULES% %VERSION% -I.. -I..\WindowsAPI ..\WindowsAPI\win32.lib %WINVERSIONS% -Idcollections-2.0c dcollections-2.0c\dcollections.lib -g -d -debug -J. -w -wi -unittest && bin\xfbuild.exe
+dmd -ofbin\xfbuild.exe -g -w -wi -debug -J. -unittest %MODULES% %VERSION% -I.. -I..\WindowsAPI ..\WindowsAPI\win32.lib %WINVERSIONS% -Idcollections-2.0c dcollections-2.0c\dcollections.lib && bin\xfbuild.exe
