@@ -5,6 +5,7 @@
 module xfbuild.MT;
 
 import std.string : format;
+import std.exception;
 import std.stdio;
 
 version (MultiThreaded)
@@ -96,13 +97,11 @@ version (MultiThreaded)
                 }
                 catch (BuildException e)
                 {
-                    writefln("Build failed: %s", e);
-                    exit(1);
+                    enforce(0, format("Build failed: %s", e));
                 }
                 catch (Exception e)
                 {
-                    writefln("%s", e);
-                    exit(1);
+                    enforce(0, e);
                 }
                 
                 atomicOp!"+="(numLeft, -1);

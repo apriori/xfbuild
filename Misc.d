@@ -38,7 +38,7 @@ void verifyMakeFilePath(string filePath, string option)
     auto dirname = filePath.absolutePath.dirName;
     if (!dirname.exists)
     {
-        try
+        try 
         {        
             mkdirRecurse(dirname);
         }
