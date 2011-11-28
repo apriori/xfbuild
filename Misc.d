@@ -9,7 +9,7 @@ module xfbuild.Misc;
 
 import xfbuild.BuildException;
 
-import std.algorithm : startsWith;
+import std.algorithm : startsWith, endsWith;
 import std.ascii     : isWhite;
 import std.string : format, stripLeft;
 alias isWhite isSpace;
@@ -19,26 +19,22 @@ import std.exception;
 import std.path;
 import std.file;
 
-bool isDirPath(string filePath)
+// std.path is missing isFilePath/isDirPath
+bool isValidFilePath(string filePath)
 {
-    auto last = filePath[$-1];
-    return (last == '\\' || last == '/');
+    auto end = filePath[$-1];
+    return (filePath.isValidPath && 
+            end != '/' && end != '\\' && 
+            filePath.baseName.isValidFilename);
 }
 
 void verifyMakeFilePath(string filePath, string option)
 {
-    // std.path is missing isFilePath/isDirPath
-    enforceEx!ParseException(!filePath.isDirPath,
-                             format("%s option must be a file path, not a directory: `%s`", 
+    enforceEx!ParseException(filePath.isValidFilePath,
+                             format("%s option must be a valid file path: `%s`", 
                                      option, 
                                      filePath));
     
-    // check invalid chars
-    enforceEx!ParseException(filePath.baseName.isValidFilename,
-                             format("%s option contains invalid characters: `%s`", 
-                                    option, 
-                                    filePath));
-
     auto dirname = filePath.absolutePath.dirName;
     if (!dirname.exists)
     {
