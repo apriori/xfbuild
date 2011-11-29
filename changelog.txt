@@ -1,2 +1,5 @@
 - 25th November 2011
     Added autogeneration of paths for +o and +D flags, highly experimental.
+- 29th November 2011
+    Addex +xpath feature which enables users to avoid compilation of any 
+    modules within a path.
