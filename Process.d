@@ -204,6 +204,8 @@ string execute(Process process)
     //~ }
 }
 
+
+
 // @TODO@ Implement pipes here
 void executeAndCheckFail(string[] cmd, size_t affinity)
 {
@@ -212,21 +214,38 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
     {
         import xfbuild.Pipes;
     }
-    
-    auto procInfo = createProcessPipes();
-    string sys = cmd.join(" ");
-    
-    auto result = runProcess(sys, procInfo);
-    auto output = readProcessPipeString(procInfo);
-    
-    if (result != 0)
+
+    version (Windows)
     {
-        string errorMsg = format("\"%s\" returned %s with error message:\n\n%s",
-                                 sys,
-                                 result,
-                                 output);
+        auto procInfo = createProcessPipes();
+        string sys = cmd.join(" ");
         
-        throw new ProcessExecutionException(errorMsg, __FILE__, __LINE__);
+        auto result = runProcess(sys, procInfo);
+        auto output = readProcessPipeString(procInfo);
+        
+        if (result != 0)
+        {
+            string errorMsg = format("\"%s\" returned %s with error message:\n\n%s",
+                                     sys,
+                                     result,
+                                     output);
+            
+            throw new ProcessExecutionException(errorMsg, __FILE__, __LINE__);
+        }        
+    }
+    else
+    {
+        string sys = cmd.join(" ");
+        int result = system(sys);
+
+        if (result != 0)
+        {
+            string errorMsg = format("\"%s\" returned %s.",
+                                     sys,
+                                     result);
+            
+            throw new ProcessExecutionException(errorMsg, __FILE__, __LINE__);
+        }
     }
 }
 
