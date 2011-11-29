@@ -84,7 +84,6 @@ string normalizePath(string path)
     return replace(path, "\\", "/");
 }
 
-// @todo@ pipes here probably
 void compileAndTrackDeps(
     Module[] compileArray,
     ref Module[string] modules,
@@ -92,8 +91,6 @@ void compileAndTrackDeps(
     size_t affinity
     )
 {
-    // @todo@ create a pipe for a single process here
-    
     Module getModule(string name, string path, bool* newlyEncountered = null)
     {
         Module worker()
@@ -523,7 +520,6 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
         //profile!("compileAndTrackDeps")({
         version (MultiThreaded) 
         {
-            // @TODO@ pipes
             int threads = globalParams.threadsToUse;
 
             // HACK: because affinity is stored in size_t
