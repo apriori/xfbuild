@@ -291,7 +291,7 @@ int main(string[] allArgs)
                         // todo: have to remove exe if we're regenerating
                         string outputFile = oldStyleArg(arg);
                         verifyMakeFilePath(outputFile, "+o");
-                        globalParams.outputFile = outputFile;
+                        globalParams.outputFile = buildNormalizedPath(outputFile);
                     }
                     );
         // major todo: longer arguments with same name must be first in array, otherwise
