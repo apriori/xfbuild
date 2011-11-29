@@ -25,9 +25,9 @@ class BuildException : Exception
     }    
 }
 
-mixin template ExceptionImpl(string name)
+string ExceptionImpl(string name)
 {
-    mixin(`
+    return(`
     class ` ~ name ~ ` : BuildException
     {
         this(string msg) 
@@ -42,7 +42,7 @@ mixin template ExceptionImpl(string name)
     }`);     
 }
 
-mixin ExceptionImpl!"CompilerError";
-mixin ExceptionImpl!"ModuleException";
-mixin ExceptionImpl!"ParseException";
-mixin ExceptionImpl!"ProcessExecutionException";
+mixin(ExceptionImpl("CompilerError"));
+mixin(ExceptionImpl("ModuleException"));
+mixin(ExceptionImpl("ParseException"));
+mixin(ExceptionImpl("ProcessExecutionException"));
