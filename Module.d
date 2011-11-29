@@ -7,6 +7,7 @@
  +/
 module xfbuild.Module;
 
+import xfbuild.BuildException;
 import xfbuild.GlobalParams;
 import xfbuild.Misc;
 
@@ -140,7 +141,7 @@ class Module
         // @BUG@ Workaround: Phobos has issues reading empty files
         if (std.file.getSize(m.path) == 0)
         {
-            throw new Exception(format("module '%s' is empty", path), __FILE__, __LINE__);
+            throw new ModuleException(format("module '%s' is empty", path), __FILE__, __LINE__);
         }
         
         auto file = File(m.path, "r");
@@ -164,7 +165,7 @@ class Module
         }
 
         if (!m.name)
-            throw new Exception(format("module '%s' needs module header", path));
+            throw new ModuleException(format("module '%s' needs module header", path));
 
         return m;
     }

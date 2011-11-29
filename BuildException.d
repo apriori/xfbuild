@@ -43,5 +43,6 @@ mixin template ExceptionImpl(string name)
 }
 
 mixin ExceptionImpl!"CompilerError";
+mixin ExceptionImpl!"ModuleException";
 mixin ExceptionImpl!"ParseException";
 mixin ExceptionImpl!"ProcessExecutionException";
