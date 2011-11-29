@@ -7,7 +7,7 @@
  +/
 module xfbuild.Module;
 
-import xfbuild.BuildException;
+import xfbuild.Exception;
 import xfbuild.GlobalParams;
 import xfbuild.Misc;
 

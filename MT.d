@@ -33,7 +33,7 @@ version (MultiThreaded)
     
     private 
     {
-        import xfbuild.BuildException;
+        import xfbuild.Exception;
     }
 
     struct MTFor

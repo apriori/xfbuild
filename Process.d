@@ -8,7 +8,7 @@
 module xfbuild.Process;
 
 import xfbuild.GlobalParams;
-import xfbuild.BuildException;
+import xfbuild.Exception;
 
 version (Windows) 
 {
@@ -37,78 +37,6 @@ import std.string;
 import std.array;
 import std.utf;
 import std.conv : to;
-
-struct SysError
-{
-    static uint lastCode()
-    {
-        version (Win32)
-            return GetLastError;
-        else
-        {
-            import core.stdc.errno;
-            return errno;
-        }
-    }
-
-    static string lastMsg()
-    {
-        return lookup(lastCode);
-    }
-
-    static string lookup(uint errcode)
-    {
-        char[] text;
-
-        version (Win32)
-        {
-            DWORD  i;
-            LPWSTR lpMsgBuf;
-
-            i = FormatMessageW(
-                FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                FORMAT_MESSAGE_FROM_SYSTEM |
-                FORMAT_MESSAGE_IGNORE_INSERTS,
-                null,
-                errcode,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),                         // Default language
-                cast(LPWSTR)&lpMsgBuf,
-                0,
-                null);
-
-            /* Remove \r\n from error string */
-            if (i >= 2)
-                i -= 2;
-
-            text = new char[i * 3];
-            i    = WideCharToMultiByte(CP_UTF8, 0, lpMsgBuf, i,
-                                       cast(PCHAR)text.ptr, text.length, null, null);
-            text = text [0 .. i];
-            LocalFree(cast(HLOCAL)lpMsgBuf);
-        }
-        else
-        {
-            import core.stdc.string;
-            uint  r;
-            char* pemsg;
-
-            pemsg = strerror(errcode);
-            r     = strlen(pemsg);
-
-            /* Remove \r\n from error string */
-            if (pemsg[r - 1] == '\n')
-                r--;
-
-            if (pemsg[r - 1] == '\r')
-                r--;
-
-            text = pemsg[0..r].dup;
-        }
-
-        // todo: remove dup
-        return text.idup;
-    }
-}
 
 alias reduce!("a ~ ' ' ~ b") flatten;
 
@@ -184,12 +112,16 @@ void checkProcessFail(Process process)
 
     if (result.status != 0)
     {
-        auto name = process.toString();
+        string name = process.toString();
 
         if (name.length > 255)
             name = name[0 .. 255] ~ " [...]";
 
-        throw new ProcessExecutionException(`"` ~ name ~ `" returned ` ~ to!string(result.status), __FILE__, __LINE__);
+        string errorMsg = format("\"%s\" returned %s",
+                                 name,
+                                 result.status);
+        
+        throw new ProcessExecutionException(errorMsg, __FILE__, __LINE__);
     }
 }
 

@@ -7,6 +7,8 @@
  +/
 module xfbuild.Pipes;
 
+import xfbuild.Exception;
+
 version (Windows)
 version (Pipes)
 {
@@ -100,11 +102,6 @@ void createProcessPipes(ref ProcessInfo procInfo)
     }
 }
 
-void makeProcess(size_t index, string procName)
-{
-    runProcess(procName, processInfos[index]);
-}
-
 int runProcess(string procName, ProcessInfo procInfo)
 {
     // Create a child process that uses the previously created pipes for STDIN and STDOUT.
@@ -153,48 +150,6 @@ int runProcess(string procName, ProcessInfo procInfo)
     return -1;
 }
 
-/*
- * Note: If you want to print out in parallel you'll have to wrap the entire
- * writefln section in a synchronized block. Just make a stub class, a 
- * __gshared instance of the class initialized from main, and do:
- * synchronized(instance) { writefln(); while (1) { writefln("...");  } writeln(); }
- */
-void readProcessPipe(size_t index, ProcessInfo procInfo)
-{
-    // Read output from the child process's pipe for STDOUT
-    // and write to the parent process's pipe for STDOUT.
-    // Stop when there is no more data.
-    DWORD  dwRead, dwWritten;
-    CHAR[BUFSIZE]   chBuf;
-    BOOL   bSuccess      = false;
-    HANDLE hParentStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    // Close the write end of the pipe before reading from the
-    // read end of the pipe, to control child process execution.
-    // The pipe is assumed to have enough buffer space to hold the
-    // data the child process has already written to it.
-    if (!CloseHandle(procInfo.childStdoutWrite))
-        ErrorExit(("StdOutWr CloseHandle"));
-        
-    writefln("Process #%s:", index);
-    
-    while (1)
-    {
-        bSuccess = ReadFile(procInfo.childStdoutRead, chBuf.ptr, BUFSIZE, &dwRead, NULL);
-
-        if (!bSuccess || dwRead == 0)
-            break;
-
-        // note: don't call writeln as you'll have text broken on new lines,
-        // but make sure to either flush via stdout.flush() or call writeln();
-        // write/writef don't flush
-        write(chBuf[0..dwRead]);
-    }
-    
-    writeln();
-}
-
-
 string readProcessPipeString(ProcessInfo procInfo)
 {
     // Read output from the child process's pipe for STDOUT
@@ -226,67 +181,8 @@ string readProcessPipeString(ProcessInfo procInfo)
     return buffer;
 }
 
-__gshared ProcessInfo[50] processInfos;
-
-/*
- * Pick between spawn or taskPool.parallel. To make them 
- * both work I've had to make processInfos global and add 
- * forwarding functions for spawn(), which load a process
- * info by index.
- */
-//~ version = StdConcurrency;
-version = StdParallelism;
-
-/+ void _main(string[] args)
-{
-    // workaround: build.d tries to build stub.d if it's present
-    system(`echo module stub; void main() { } > stub.d`);  
-    scope(exit) { std.file.remove("stub.d"); }
-    
-    foreach (ref procInfo; processInfos)
-    {
-        createProcessPipes(procInfo);
-    }
-    
-    writeln("\n->Start of parent execution.\n");
-    
-    version (StdParallelism)
-    {
-        foreach (procInfo; taskPool.parallel(processInfos[], 1))
-        {
-            makeProcess(r"dmd stub.d stub.d", procInfo);
-        }        
-    }
-    else
-    version (StdConcurrency)
-    {
-        foreach (index; 0 .. processInfos.length)
-        {
-            spawn(&makeProcess, index, r"dmd stub.d stub.d");
-        }        
-    }
-    else
-    static assert("Set version to StdParallelism or StdConcurrency");
-
-    thread_joinAll(); 
-    
-    // read out sequentally, if you want to do it in parallel you have to make
-    // sure you don't interleave your writeln calls (see readProcessPipe)
-    foreach (index, procInfo; processInfos)
-    {
-        readProcessPipe(index, procInfo);
-    }
-    
-    writeln("\n->End of parent execution.\n");
-
-    // The remaining open handles are cleaned up when this process terminates.
-    // To avoid resource leaks in a larger application, close handles explicitly.
-} +/
-
 void ErrorExit(string lpszFunction)
 {
-    // Format a readable error message, display a message box,
-    // and exit from the application.
     LPVOID lpMsgBuf;
     LPVOID lpDisplayBuf;
     DWORD  dw = GetLastError();
@@ -304,16 +200,13 @@ void ErrorExit(string lpszFunction)
     lpDisplayBuf = cast(LPVOID)LocalAlloc(LMEM_ZEROINIT,
                                       (lstrlen(cast(LPCTSTR)lpMsgBuf) + lstrlen(cast(LPCTSTR)lpszFunction) + 40) * (TCHAR.sizeof));
     
-    auto str = format("%s failed with error %s: %s",
-                      lpszFunction,
-                      dw,
-                      fromUTF16z(cast(wchar*)lpMsgBuf)
-                      );
-    writeln(str);
-    
-    // protip: never use exit/exitProcess, your scope() statements won't run
-    // and you'll end up with garbage on the drive (temporary files), etc.
-    enforce(0);
+    auto errorMsg = format("%s failed with error %s: %s",
+                           lpszFunction,
+                           dw,
+                           fromUTF16z(cast(wchar*)lpMsgBuf)
+                           );
+                          
+    throw new ProcessExecutionException(errorMsg, __FILE__, __LINE__);
 }
 
-} // version Windows version Pipes
+}  // version(Windows) version(Pipes)

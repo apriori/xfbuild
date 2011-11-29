@@ -11,7 +11,7 @@ import xfbuild.GlobalParams;
 import xfbuild.Module;
 import xfbuild.Process;
 import xfbuild.Misc;
-import xfbuild.BuildException;
+import xfbuild.Exception;
 
 import dcollections.HashSet;
 

@@ -7,7 +7,7 @@
  +/
 module xfbuild.Misc;
 
-import xfbuild.BuildException;
+import xfbuild.Exception;
 
 import std.algorithm : startsWith, endsWith;
 import std.ascii     : isWhite;

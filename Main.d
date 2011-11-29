@@ -12,7 +12,7 @@ import xfbuild.BuildTask;
 import xfbuild.Misc;
 import xfbuild.Compiler : CompilerError;
 import xfbuild.GlobalParams;
-import xfbuild.BuildException;
+import xfbuild.Exception;
 import xfbuild.Process;
 
 import std.algorithm;

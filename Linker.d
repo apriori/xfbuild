@@ -88,6 +88,8 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
         string currentFile   = null;
         Module currentModule = null;
 
+        writefln("LINKING, OUTPUT IS: %s", output);
+        
         foreach (line; output.splitLines)
         {
             line = strip(line);
@@ -187,11 +189,15 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
                 //~ Stderr.copy(process.stdout).flush;
             }
 
-            if (retryCompile && globalParams.verbose)
-                writeln("ignoring linker error, will try to recompile");
-            else if (!retryCompile)
+            if (retryCompile)
+            {
+                if (globalParams.verbose) 
+                    writeln("ignoring linker error, will try to recompile");
+            }
+            else
+            {
                 throw e;                 // rethrow exception since we're not going to retry what we did
-
+            }
         }
     }
 
