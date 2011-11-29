@@ -456,7 +456,7 @@ int main(string[] allArgs)
     }
     catch (BuildException e)
     {
-        writefln("Build failed: %s", e);
+        writefln("Build failed: %s", e.errorMsg);
         return 1;
     }
 }

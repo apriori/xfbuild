@@ -8,6 +8,7 @@
 module xfbuild.Process;
 
 import xfbuild.GlobalParams;
+import xfbuild.BuildException;
 
 version (Windows) 
 {
@@ -177,19 +178,6 @@ struct Process
     }
 }
 
-class ProcessExecutionException : Exception
-{
-    this(string msg) 
-    {
-        super(msg);
-    }
-    
-    this(string msg, string file, size_t line, Exception next = null)
-    {
-        super(msg, file, line, next);
-    }
-}
-
 void checkProcessFail(Process process)
 {
     auto result = process.wait();
@@ -216,21 +204,30 @@ string execute(Process process)
     //~ }
 }
 
+// @TODO@ Implement pipes here
 void executeAndCheckFail(string[] cmd, size_t affinity)
 {
-    void runNoAffinity()
+    version (Windows)
+    version (Pipes)
     {
-        string sys = cmd.join(" ");
-        int ret    = system(sys);
-
-        if (ret != 0)
-        {
-            throw new ProcessExecutionException(`"` ~ sys ~ `" returned ` ~ to!string(ret), __FILE__, __LINE__);
-        }
+        import xfbuild.Pipes;
     }
-
-    // todo: affinity
-    runNoAffinity();
+    
+    auto procInfo = createProcessPipes();
+    string sys = cmd.join(" ");
+    
+    auto result = runProcess(sys, procInfo);
+    auto output = readProcessPipeString(procInfo);
+    
+    if (result != 0)
+    {
+        string errorMsg = format("\"%s\" returned %s with error message:\n\n%s",
+                                 sys,
+                                 result,
+                                 output);
+        
+        throw new ProcessExecutionException(errorMsg, __FILE__, __LINE__);
+    }
 }
 
 __gshared int value;

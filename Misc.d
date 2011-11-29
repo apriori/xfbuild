@@ -12,6 +12,7 @@ import xfbuild.BuildException;
 import std.algorithm : startsWith, endsWith;
 import std.ascii     : isWhite;
 import std.string : format, stripLeft;
+import std.stdio;
 alias isWhite isSpace;
 alias stripLeft triml;
 import std.algorithm : countUntil;
@@ -34,6 +35,14 @@ void verifyMakeFilePath(string filePath, string option)
                              format("%s option must be a valid file path: `%s`", 
                                      option, 
                                      filePath));
+    
+    if (filePath.exists && filePath.isDir)
+    {
+        enforceEx!ParseException(0,
+                                 format("%s option must be file path, not an existing directory: `%s`", 
+                                        option, 
+                                        filePath));
+    }
     
     auto dirname = filePath.absolutePath.dirName;
     if (!dirname.exists)
@@ -59,6 +68,11 @@ unittest
     
     auto _tempdir = buildPath(absolutePath("."), "unittest_temp");
     auto workdir = buildPath(_tempdir, "subdir");
+    
+    if (_tempdir.exists)
+    {
+        rmdirRecurse(_tempdir);
+    }
     
     mkdirRecurse(_tempdir);
     scope(exit)

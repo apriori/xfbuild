@@ -9,11 +9,26 @@ module xfbuild.BuildException;
 
 import std.exception;
 
-// resolve copypaste maddness
-mixin template NormalException(string name)
+class BuildException : Exception
+{
+    string errorMsg;
+    this(string msg) 
+    {
+        errorMsg = msg;
+        super(msg);
+    }
+    
+    this(string msg, string file, size_t line, Exception next = null)
+    {
+        errorMsg = msg;
+        super(msg, file, line, next);
+    }    
+}
+
+mixin template ExceptionImpl(string name)
 {
     mixin(`
-    class ` ~ name ~ ` : Exception
+    class ` ~ name ~ ` : BuildException
     {
         this(string msg) 
         {
@@ -27,5 +42,6 @@ mixin template NormalException(string name)
     }`);     
 }
 
-mixin NormalException!"BuildException";
-mixin NormalException!"ParseException";
+mixin ExceptionImpl!"CompilerError";
+mixin ExceptionImpl!"ParseException";
+mixin ExceptionImpl!"ProcessExecutionException";

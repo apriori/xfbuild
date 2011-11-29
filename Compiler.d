@@ -51,19 +51,6 @@ shared static this()
     //verboseRegex = Regex(`^parse|semantic|function|import|library|code.*`);
 }
 
-class CompilerError : BuildException
-{
-    this(string msg) 
-    {
-        super(msg);
-    }
-    
-    this(string msg, string file, size_t line, Exception next = null)
-    {
-        super(msg, file, line, next);
-    }
-}
-
 // TODO: Cache the escaped paths?
 private string unescapePath(string path)
 {
@@ -97,6 +84,7 @@ string normalizePath(string path)
     return replace(path, "\\", "/");
 }
 
+// @todo@ pipes here probably
 void compileAndTrackDeps(
     Module[] compileArray,
     ref Module[string] modules,
@@ -104,6 +92,8 @@ void compileAndTrackDeps(
     size_t affinity
     )
 {
+    // @todo@ create a pipe for a single process here
+    
     Module getModule(string name, string path, bool* newlyEncountered = null)
     {
         Module worker()
@@ -215,8 +205,11 @@ void compileAndTrackDeps(
                 mods ~= m.name;
             }
             
-            throw new CompilerError("Error compiling " ~ mods, __FILE__,
-                                    __LINE__, e);
+            string errorMsg = format("Error compiling modules [%s]\n\n%s",
+                                     mods,
+                                     e.errorMsg);            
+            
+            throw new CompilerError(errorMsg, __FILE__, __LINE__);
         }
     }
 
@@ -307,7 +300,7 @@ void compileAndTrackDeps(
 void compile(
     string[] extraArgs,
     Module[] compileArray,
-    void delegate(string) stdout,
+    void delegate(string) stdout,  // unused
     bool moveObjects,
     size_t affinity,
     )
@@ -530,6 +523,7 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
         //profile!("compileAndTrackDeps")({
         version (MultiThreaded) 
         {
+            // @TODO@ pipes
             int threads = globalParams.threadsToUse;
 
             // HACK: because affinity is stored in size_t
