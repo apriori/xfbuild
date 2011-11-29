@@ -12,18 +12,28 @@
 == Building Requirements ==
     - DMD v2.056+ compiler. Download DMD from: http://www.digitalmars.com/d/download.html
       Usage instructions: http://d-programming-language.org/dmd-windows.html
+                          http://d-programming-language.org/dmd-linux.html
 
-    - Windows only: WindowsAPI bindings library, get it here:
+    - Windows only: WindowsAPI bindings library, get it from here:
         http://dsource.org/projects/bindings/wiki/WindowsApi
-      
-      Install it next to the xfBuild dir:
-        .\xfBuild
-        .\WindowsAPI
     
-    - DCollections 2.0 (included). Obtainable from:
+      Then:
+        1. Install it next to the xfBuild dir:
+          .\xfBuild 
+          .\WindowsAPI
+          
+        2. Copy the build_unicode.bat file from:
+             .\xfBuild\win32\build_unicode.bat
+           to:
+             .\WindowsAPI\win32\build_unicode.bat
+             
+           and run it to build the static library.
+    
+    - DCollections 2.0 (included). Also obtainable from:
         http://www.dsource.org/projects/dcollections
 
-    Tested on XP SP3 and Lubuntu, x86.
+    xfBuild was tested on XP SP3 and Lubuntu, x86.
+    OSX has not yet been tested.
       
 == Building xfBuild ==
     Windows: 
@@ -34,8 +44,8 @@
             PATH=%PATH%;c:\xfBuild\
 
     Linux: 
-        Run chmod a-w+x linuxbuild.sh
-        Run ./linuxbuild.sh (lousy shell script, I know)
+        Run chmod +x linuxbuild.sh
+        Run ./linuxbuild.sh
 
         Optionally, add to PATH (change this appropriately)
             PATH=$PATH:/home/username/dev/xfBuild/
@@ -50,21 +60,21 @@
     Run xfBuild to see all the options. 
     To get an executable use the +o switch:
       
-      xfBuild main.d +omain.exe
+      xfBuild main.d +omain.exe (or +omain for linux)
 
 == What works ==
     Very simple hello_world builds, and most of my "sample code" stuff in my
     repositories. 
 
 == License ==
-    xfBuild is Boost-licensed, acknowlidged by the original author, Tomasz Stachowiak.
+    xfBuild is Boost-licensed, acknowledged by the original author Tomasz Stachowiak.
     See accompanying file LICENSE_1_0.txt or copy at
     http://www.boost.org/LICENSE_1_0.txt
 
 == Acknowledgments ==
     Special thanks to Tomasz Stachowiak for creating xfBuild and allowing me
-    to license it under Boost.
-    Thanks to Steven Schveighoffer for making dcollections 2.0.
+    to license it under the Boost license.
+    Thanks to Steven Schveighoffer for creating Dcollections v2.0.
 
 == Contributors ==
     Tomasz Stachowiak
