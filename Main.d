@@ -15,22 +15,23 @@ import xfbuild.GlobalParams;
 import xfbuild.Exception;
 import xfbuild.Process;
 
+import dcollections.HashMap;
+
 import std.algorithm;
 import std.array;
 import std.conv;
 import std.stdio;
 import std.file;
 import std.path;
+import std.string;
 import std.c.process;
-import std.process;
-import std.parallelism : totalCPUs;
 import std.cpuid : threadsPerCPU;
 
 void printHelpAndQuit(int status)
 {
     writeln(
-        `xfBuild 0.5.0
-http://bitbucket.org/h3r3tic/xfbuild/
+        `xfBuild 0.5.2
+http://github.com/AndrejMitrovic/xfbuild
 
 Usage:
     xfbuild [+help]
@@ -48,6 +49,7 @@ ROOT:
 
 Recognized OPTION(s):
     +x=PACKAGE      Don't compile any modules within the package
+    +xpath=PATH     Don't compile any modules within the path
     +full           Perform a full build
     +clean          Perform clean, remove object files
     +redep          Remove the dependency file afterwards
@@ -108,24 +110,28 @@ Environment Variables:
 
 struct ArgParser
 {
-    void delegate(string) err;
+    void error(string arg)
+    {
+        throw new ParseException(format("Unknown argument: +%s", arg));
+    }
     
     struct Reg
     {
-        string t;
+        string arg;
         void delegate() a;
         void delegate(string) b;
     }
 
-    Reg[] reg;
-    void bind(string t, void delegate() a)
+    Reg[] regs;
+    
+    void bind(string arg, void delegate() a)
     {
-        reg ~= Reg(t, a, null);
+        regs ~= Reg(arg, a, null);
     }
 
-    void bind(string t, void delegate(string) b)
+    void bind(string arg, void delegate(string) b)
     {
-        reg ~= Reg(t, null, b);
+        regs ~= Reg(arg, null, b);
     }
 
     void parse(string[] args)
@@ -134,31 +140,31 @@ argIter:
 
         foreach (arg; args)
         {
-            if (0 == arg.length)
+            if (arg.length == 0)
                 continue;
 
             if (arg[0] != '+')
             {
-                err(arg);
+                error(arg);
                 continue;
             }
 
             arg = arg[1..$];
 
-            foreach (r; reg)
+            foreach (reg; regs)
             {
-                if (r.t.length <= arg.length && r.t == arg[0..r.t.length])
+                if (reg.arg.length <= arg.length && reg.arg == arg[0..reg.arg.length])
                 {
-                    if (r.a !is null)
-                        r.a();
+                    if (reg.a !is null)
+                        reg.a();
                     else
-                        r.b(arg[r.t.length..$]);
+                        reg.b(arg[reg.arg.length..$]);
 
                     continue argIter;
                 }
             }
 
-            err(arg);
+            error(arg);
         }
     }
 }
@@ -166,7 +172,8 @@ argIter:
 
 void determineSystemSpecificOptions()
 {
-    version (Windows) {
+    version (Windows) 
+    {
         /* Walter has admitted to OPTLINK having issues with threading */
         globalParams.linkerAffinityMask = getNthAffinityMaskBit(0);
     }
@@ -240,11 +247,7 @@ int main(string[] allArgs)
             }
         }
 
-        auto parser = ArgParser((string arg) {
-                                    throw new Exception("unknown argument: " ~ arg);
-                                }
-                                );
-
+        ArgParser parser;
 
         auto threadsToUse = max(threadsPerCPU, 1);
         globalParams.threadsToUse = threadsToUse;
@@ -253,18 +256,11 @@ int main(string[] allArgs)
         bool removeObjs = false;
         bool removeDeps = false;
 
-        // support for the olde arg style where they didn't have to be
-        // preceded with an equal sign
-        string olde(string arg)
+        // support for argument stle without assignment (+oa.exe == +o=a.exe)
+        string oldStyleArg(ref string arg)
         {
-            if (arg.length > 0 && '=' == arg[0])
-            {
-                return arg[1..$];
-            }
-            else
-            {
-                return arg;
-            }
+            arg.munch("=");
+            return arg;
         }
 
         parser.bind("full", { removeObjs = true;
@@ -274,34 +270,40 @@ int main(string[] allArgs)
                                quit = true;
                     }
                     );
-        parser.bind("c", (string arg)    { globalParams.compilerName = olde(arg);
+        parser.bind("c", (string arg)    { globalParams.compilerName = oldStyleArg(arg);
                     }
                     );
-        parser.bind("C", (string arg)    { globalParams.objExt = olde(arg);
+        parser.bind("C", (string arg)    { globalParams.objExt = oldStyleArg(arg);
                     }
                     );                                                                                                  // HACK: should use profiles/configs instead
-        parser.bind("O", (string arg)    { globalParams.objPath = olde(arg);
+        parser.bind("O", (string arg)    { globalParams.objPath = oldStyleArg(arg);
                     }
                     );                    
         parser.bind("D", (string arg)    
                     {
-                        string depsPath = olde(arg);
+                        string depsPath = oldStyleArg(arg);
                         verifyMakeFilePath(depsPath, "+D");
                         globalParams.depsPath = depsPath;
                     }
                     );
         parser.bind("o", (string arg)    
-                    { 
+                    {
                         // todo: have to remove exe if we're regenerating
-                        string outputFile = olde(arg);
+                        string outputFile = oldStyleArg(arg);
                         verifyMakeFilePath(outputFile, "+o");
                         globalParams.outputFile = outputFile;
                     }
                     );
-        parser.bind("x", (string arg)    { globalParams.ignore ~= olde(arg);
+        // major todo: longer arguments with same name must be first in array, otherwise
+        // they end up being passed as shorter arguments. We have to implement something
+        // better.
+        parser.bind("xpath", (string arg)    { globalParams.ignorePaths ~= oldStyleArg(arg);
+                    }
+                    );                        
+        parser.bind("x", (string arg)    { globalParams.ignore ~= oldStyleArg(arg);
                     }
                     );
-        parser.bind("modLimit", (string arg)    { globalParams.maxModulesToCompile = to!int(olde(arg));
+        parser.bind("modLimit", (string arg)    { globalParams.maxModulesToCompile = to!int(oldStyleArg(arg));
                     }
                     );
         parser.bind("mod-limit=", (string arg){ globalParams.maxModulesToCompile = to!int(arg);
@@ -319,13 +321,13 @@ int main(string[] allArgs)
                     }
                     );
 
-        parser.bind("threads", (string arg)    { globalParams.threadsToUse = to!int(olde(arg));
+        parser.bind("threads", (string arg)    { globalParams.threadsToUse = to!int(oldStyleArg(arg));
                     }
                     );
         parser.bind("no-affinity", { globalParams.manageAffinity = false;
                     }
                     );
-        parser.bind("linker-affinity=", (string arg){ char[] x = olde(arg).dup; globalParams.linkerAffinityMask = parse!int(x, 16);
+        parser.bind("linker-affinity=", (string arg){ char[] x = oldStyleArg(arg).dup; globalParams.linkerAffinityMask = parse!int(x, 16);
                     }
                     );
 
@@ -435,7 +437,7 @@ int main(string[] allArgs)
 
             
             if (mainFiles is null)
-                throw new Exception("At least one MODULE needs to be specified, see +help");
+                throw new BuildException("At least one MODULE needs to be specified, see +help");
 
             buildTask.execute();
         }

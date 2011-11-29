@@ -30,6 +30,7 @@ struct GlobalParams
     string outputFile;
     string workingPath;
     string[] ignore;
+    string[] ignorePaths;
 
     bool manageHeaders = false;
     string[] noHeaders;

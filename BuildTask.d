@@ -18,8 +18,8 @@ import std.file;
 import std.conv;
 import std.stdio;
 import std.string;
+import std.path;
 
-// todo: verify, originally scope class
 struct BuildTask
 {
     Module[string]  modules;
@@ -156,7 +156,14 @@ struct BuildTask
                     {
                         if (globalParams.verbose)
                             writeln(name ~ " is ignored");
-
+                        continue;
+                    }
+                    
+                    auto realPath = dirName(buildNormalizedPath(path));
+                    if (isPathIgnored(realPath))
+                    {
+                        if (globalParams.verbose)
+                            writeln(path ~ " is ignored");
                         continue;
                     }
 
@@ -198,8 +205,8 @@ struct BuildTask
                         foreach (dep; splitter(deps, ","))
                         {
                             if (!dep.length)
-                                continue;
-
+                                continue;                          
+                            
                             if (isIgnored(dep))
                             {
                                 if (globalParams.verbose)
@@ -220,7 +227,6 @@ struct BuildTask
             {
                 foreach (d; m.depNames)
                 {
-                    // drey: simplified
                     if (auto x = (d in modules))
                     {
                         m.addDep(*x);

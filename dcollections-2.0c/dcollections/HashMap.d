@@ -975,18 +975,6 @@ final class HashMap(K, V, alias ImplTemp=Hash, alias hashFunction=DefaultHash!K)
         return !elemAt(key).empty;
     }
 
-    V opIn_r(const(K) key)
-    {
-        auto it = elemAt(key);
-        
-        if (it.empty)
-        {
-            return null;
-        }
-        
-        return it.front();
-    }
-    
     static if(doUnittest) unittest
     {
         auto hm = new HashMap;

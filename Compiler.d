@@ -19,6 +19,7 @@ import std.parallelism;
 import std.array;
 import std.file;
 import std.stdio;
+import std.path;
 
 version (MultiThreaded) 
 {
@@ -235,12 +236,14 @@ void compileAndTrackDeps(
 
             if (arr !is null)
             {
+                // here we already have the path ready
                 string modName = arr[0];
                 string modPath = unescapePath(arr[1]);
-
+                
+                auto realPath = dirName(buildNormalizedPath(modPath));
                 //string prot = arr[2];
 
-                if (!isIgnored(modName))
+                if (!isIgnored(modName) && !isPathIgnored(realPath))
                 {
                     assert(modPath.length > 0);
                     Module m = getModule(modName, modPath);
@@ -248,7 +251,9 @@ void compileAndTrackDeps(
                     string depName = arr[3];
                     string depPath = unescapePath(arr[4]);
 
-                    if (depName != "object" && !isIgnored(depName))
+                    auto realDepPath = dirName(buildNormalizedPath(depPath));
+                    
+                    if (depName != "object" && !isIgnored(depName) && !isPathIgnored(realDepPath))
                     {
                         assert(depPath.length > 0);
 
@@ -257,6 +262,11 @@ void compileAndTrackDeps(
                         //writefln("Module %s depends on %s", m.name, depMod.name);
                         m.addDep(depMod);
                     }
+                }
+                else
+                {
+                    // debugging
+                    //~ writeln("PATH IGNORED: ", realPath);
                 }
             }
         }
@@ -444,8 +454,8 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
         }
     }
 
-    
     auto toCompile = new HashSet!(Module);
+    
     {
         Module[] checkDeps;
 
@@ -487,7 +497,7 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
     }
 
     compileArray = array(toCompile);
-
+    
     if (globalParams.verbose)
     {
         writefln("Modules to be compiled: %s", compileArray);
@@ -539,9 +549,14 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
 
                 if (globalParams.verbose)
                 {
-                    writefln("Thread %s: compiling %s modules", th, mods.length);
+                    if (mods.length)
+                    writefln("Thread %s: compiling:", th);
+                    foreach (mod; mods)
+                    {
+                        writefln("  mod name :%s mod path: %s ", mod.name, mod.path);
+                    }
                 }
-
+                
                 if (mods.length > 0)
                 {
                     compileAndTrackDeps(

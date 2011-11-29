@@ -182,3 +182,13 @@ bool isIgnored(string name)
     return false;
 }
 
+bool isPathIgnored(string name)
+{
+    foreach (m; globalParams.ignorePaths)
+    {
+        if (name.length >= m.length && name[0 .. m.length] == m)
+            return true;
+    }
+
+    return false;
+}
