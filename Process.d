@@ -204,8 +204,6 @@ string execute(Process process)
     //~ }
 }
 
-
-
 // @TODO@ Implement pipes here
 void executeAndCheckFail(string[] cmd, size_t affinity)
 {
