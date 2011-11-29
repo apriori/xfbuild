@@ -88,8 +88,6 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
         string currentFile   = null;
         Module currentModule = null;
 
-        writefln("LINKING, OUTPUT IS: %s", output);
-        
         foreach (line; output.splitLines)
         {
             line = strip(line);
