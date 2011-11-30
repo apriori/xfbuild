@@ -550,17 +550,17 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
             {
                 auto mods = compileNow[compileNow.length * th / threads .. compileNow.length * (th + 1) / threads];
 
-                if (globalParams.verbose && mods.length)
+                if (mods.length)
                 {
-                    logger[th] = format("Thread %s: compiling:\n", th);
-                    foreach (mod; mods)
+                    if (globalParams.verbose)
                     {
-                        logger[th] ~= format("  Module: %s\n  Path: %s \n", mod.name, mod.path);
-                    }
-                }
-                
-                if (mods.length > 0)
-                {
+                        logger[th] = format("Thread %s: compiling:\n", th);
+                        foreach (mod; mods)
+                        {
+                            logger[th] ~= format("  Module: %s\n  Path: %s \n", mod.name, mod.path);
+                        }
+                    }                    
+                    
                     compileAndTrackDeps(
                         mods,
                         modules,

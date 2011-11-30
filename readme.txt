@@ -56,11 +56,20 @@
         with itself. Make sure you're not outputting over the executable
         you're already running.
 
-== Using xfBuild ==
-    Run xfBuild to see all the options. 
+== Usage Instructions ==
     To get an executable use the +o switch:
+        xfBuild +omain.exe main.d (or +omain for linux)
       
-      xfBuild main.d +omain.exe (or +omain for linux)
+    To avoid compiling modules in a path (e.g. Phobos since DMD links it in implicitly)
+    use the +xpath option:
+        xfbuild +omain.exe +xpath=D:\DMD\dmd2\src main.d
+        
+    This can lead to substantially faster builds.
+    
+    Note that if you use the +x (for packages) or +xpath (for paths)
+    to avoid compiling modules from a custom library, you will typically 
+    have to pass the path to the prebuild library. Otherwise you'll
+    get linking errors.
 
 == What works ==
     Very simple hello_world builds, and most of my "sample code" stuff in my
