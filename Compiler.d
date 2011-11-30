@@ -570,11 +570,14 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
                 }
             }
 
-            foreach (i; 0 .. threads)
+            if (globalParams.verbose)
             {
-                if (auto log = i in logger)
+                foreach (i; 0 .. threads)
                 {
-                    writeln(*log);
+                    if (auto log = i in logger)
+                    {
+                        writeln(*log);
+                    }
                 }
             }
 
