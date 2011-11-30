@@ -190,25 +190,27 @@ else
     __gshared int value;
 }
 
+class Foo { }
+__gshared Foo mutex;
+
 void executeCompilerViaResponseFile(string compiler, string[] args, size_t affinity)
 {
+    string rspFile;
     version (MultiThreaded)
     {
-        atomicOp!"+="(value, 1);
+        synchronized (mutex)
+        {
+            atomicOp!"+="(value, 1);
+            rspFile = format("xfbuild.%s.rsp", value);
+        }
     }
     else
     {
         value += 1;
+        rspFile = format("xfbuild.%s.rsp", value);
     }
-    
-    string rspFile = format("xfbuild.%s.rsp", value);
+        
     string rspData = args.join("\n");
-
-    /+if (globalParams.verbose) {
-            writefln("running the compiler with:\n%s", rspData);
-       }+/
-    auto file = File(rspFile, "w");
-    file.write(rspData);
 
     scope (failure)
     {
@@ -221,9 +223,15 @@ void executeCompilerViaResponseFile(string compiler, string[] args, size_t affin
     scope (success)
     {
         std.file.remove(rspFile);
-    }
-
+    }    
+    
+    /+if (globalParams.verbose) {
+            writefln("running the compiler with:\n%s", rspData);
+       }+/
+    auto file = File(rspFile, "w");
+    file.write(rspData);
     file.close();
+
     executeAndCheckFail([compiler, "@" ~ rspFile], affinity);
 }
 

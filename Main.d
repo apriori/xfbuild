@@ -181,6 +181,7 @@ void determineSystemSpecificOptions()
 
 int main(string[] allArgs)
 {
+    mutex = new Foo;
     determineSystemSpecificOptions();
 
     string[] envArgs;
@@ -297,7 +298,10 @@ int main(string[] allArgs)
         // major todo: longer arguments with same name must be first in array, otherwise
         // they end up being passed as shorter arguments. We have to implement something
         // better.
-        parser.bind("xpath", (string arg)    { globalParams.ignorePaths ~= oldStyleArg(arg);
+        parser.bind("xpath", (string arg)    
+                    { 
+                        string outPath = oldStyleArg(arg);
+                        globalParams.ignorePaths ~= buildNormalizedPath(outPath);
                     }
                     );                        
         parser.bind("x", (string arg)    { globalParams.ignore ~= oldStyleArg(arg);
