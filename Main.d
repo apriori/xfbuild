@@ -20,6 +20,7 @@ import dcollections.HashMap;
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.exception;
 import std.stdio;
 import std.file;
 import std.path;
@@ -154,11 +155,23 @@ argIter:
             foreach (reg; regs)
             {
                 if (reg.arg.length <= arg.length && reg.arg == arg[0..reg.arg.length])
-                {
-                    if (reg.a !is null)
-                        reg.a();
-                    else
-                        reg.b(arg[reg.arg.length..$]);
+                {                    
+                    try 
+                    { 
+                        if (reg.a !is null)
+                        {
+                            reg.a();         
+                        }
+                        else
+                        {
+                            reg.b(arg[reg.arg.length..$]);
+                        }
+                            
+                    }
+                    catch (Exception e)
+                    {
+                        enforceEx!ParseException(0, format("Failed to parse option %s.\n\nError: %s", reg.arg, e.toString));
+                    }
 
                     continue argIter;
                 }
@@ -284,7 +297,7 @@ int main(string[] allArgs)
                     { 
                         globalParams.objExt = oldStyleArg(arg);
                     }
-                    );                                                                                                  // HACK: should use profiles/configs instead
+                    );  // HACK: should use profiles/configs instead
         parser.bind("O", (string arg)    
                     { 
                         string objPath = oldStyleArg(arg);
@@ -321,7 +334,7 @@ int main(string[] allArgs)
                     }
                     );
         parser.bind("modLimit", (string arg)    
-                    { 
+                    {
                         globalParams.maxModulesToCompile = to!int(oldStyleArg(arg));
                     }
                     );
