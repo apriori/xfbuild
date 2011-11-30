@@ -66,7 +66,7 @@
         
     This can lead to substantially faster builds.
     
-    Ubuntu note: Use xpath=/usr/include if xfBuild is having file write errors.
+    Ubuntu note: Use xpath=/usr/include/d/ if xfBuild is having file write errors.
     
     Note that if you use the +x (for packages) or +xpath (for paths)
     to avoid compiling modules from a custom library, you will typically 
