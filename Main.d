@@ -264,20 +264,31 @@ int main(string[] allArgs)
             return arg;
         }
 
-        parser.bind("full", { removeObjs = true;
+        parser.bind("full", 
+                    { 
+                        removeObjs = true;
                     }
                     );
-        parser.bind("clean", { removeObjs = true;
-                               quit = true;
+        parser.bind("clean", 
+                    { 
+                        removeObjs = true;
+                        quit = true;
                     }
                     );
-        parser.bind("c", (string arg)    { globalParams.compilerName = oldStyleArg(arg);
+        parser.bind("c", (string arg)    
+                    { 
+                        globalParams.compilerName = oldStyleArg(arg);
                     }
                     );
-        parser.bind("C", (string arg)    { globalParams.objExt = oldStyleArg(arg);
+        parser.bind("C", (string arg)    
+                    { 
+                        globalParams.objExt = oldStyleArg(arg);
                     }
                     );                                                                                                  // HACK: should use profiles/configs instead
-        parser.bind("O", (string arg)    { globalParams.objPath = oldStyleArg(arg);
+        parser.bind("O", (string arg)    
+                    { 
+                        string objPath = oldStyleArg(arg);
+                        globalParams.objPath = buildNormalizedPath(objPath);
                     }
                     );                    
         parser.bind("D", (string arg)    
@@ -304,59 +315,92 @@ int main(string[] allArgs)
                         globalParams.ignorePaths ~= buildNormalizedPath(outPath);
                     }
                     );                        
-        parser.bind("x", (string arg)    { globalParams.ignore ~= oldStyleArg(arg);
+        parser.bind("x", (string arg)    
+                    { 
+                        globalParams.ignore ~= oldStyleArg(arg);
                     }
                     );
-        parser.bind("modLimit", (string arg)    { globalParams.maxModulesToCompile = to!int(oldStyleArg(arg));
+        parser.bind("modLimit", (string arg)    
+                    { 
+                        globalParams.maxModulesToCompile = to!int(oldStyleArg(arg));
                     }
                     );
-        parser.bind("mod-limit=", (string arg){ globalParams.maxModulesToCompile = to!int(arg);
+        parser.bind("mod-limit=", (string arg)
+                    { 
+                        globalParams.maxModulesToCompile = to!int(arg);
                     }
                     );
         parser.bind("redep", { removeDeps = true;
                     }
                     );
-        parser.bind("v", { globalParams.verbose = globalParams.printCommands = true;
+        parser.bind("v", 
+                    { 
+                        globalParams.verbose = globalParams.printCommands = true;
                     }
                     );
 
-        //parser.bind("profile",			        { profiling = true; });
-        parser.bind("h", { globalParams.manageHeaders = true;
+        //parser.bind("profile", { profiling = true; });
+        parser.bind("h", 
+                    { 
+                        globalParams.manageHeaders = true;
                     }
                     );
 
-        parser.bind("threads", (string arg)    { globalParams.threadsToUse = to!int(oldStyleArg(arg));
+        parser.bind("threads", (string arg)    
+                    { 
+                        globalParams.threadsToUse = to!int(oldStyleArg(arg));
                     }
                     );
-        parser.bind("no-affinity", { globalParams.manageAffinity = false;
+        parser.bind("no-affinity", 
+                    { 
+                        globalParams.manageAffinity = false;
                     }
                     );
-        parser.bind("linker-affinity=", (string arg){ char[] x = oldStyleArg(arg).dup; globalParams.linkerAffinityMask = parse!int(x, 16);
+        parser.bind("linker-affinity=", (string arg) 
+                    { 
+                        string x = oldStyleArg(arg); 
+                        globalParams.linkerAffinityMask = parse!int(x, 16);
                     }
                     );
 
-        parser.bind("q", { globalParams.useOQ = true;
+        parser.bind("q", 
+                    { 
+                        globalParams.useOQ = true;
                     }
                     );
-        parser.bind("noop", { globalParams.useOP = false;
+        parser.bind("noop", 
+                    { 
+                        globalParams.useOP = false;
                     }
                     );
-        parser.bind("nolink", { globalParams.nolink = true;
+        parser.bind("nolink", 
+                    { 
+                        globalParams.nolink = true;
                     }
                     );
-        parser.bind("rmo", { globalParams.reverseModuleOrder = true;
+        parser.bind("rmo", 
+                    { 
+                        globalParams.reverseModuleOrder = true;
                     }
                     );
-        parser.bind("mbm", { globalParams.moduleByModule = true;
+        parser.bind("mbm", 
+                    { 
+                        globalParams.moduleByModule = true;
                     }
                     );
-        parser.bind("R", { globalParams.recursiveModuleScan = true;
+        parser.bind("R", 
+                    { 
+                        globalParams.recursiveModuleScan = true;
                     }
                     );
-        parser.bind("nodeps", { globalParams.useDeps = false;
+        parser.bind("nodeps", 
+                    { 
+                        globalParams.useDeps = false;
                     }
                     );
-        parser.bind("keeprsp", { globalParams.removeRspOnFail = false;
+        parser.bind("keeprsp", 
+                    { 
+                        globalParams.removeRspOnFail = false;
                     }
                     );
 
