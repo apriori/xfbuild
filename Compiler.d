@@ -15,6 +15,7 @@ import xfbuild.Exception;
 
 import dcollections.HashSet;
 
+import std.algorithm;
 import std.parallelism;
 import std.array;
 import std.file;
@@ -500,7 +501,7 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
     
     if (globalParams.verbose)
     {
-        writefln("Modules to be compiled: %s", compileArray);
+        writefln("Modules to be compiled: %s\n", compileArray);
     }
 
     //});
@@ -543,17 +544,18 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
             Module[][] threadNow   = new Module[][threads];
             Module[][] threadLater = new Module[][threads];
 
+            string[int] logger;
+            
             foreach (th; mtFor(.taskPool, 0, threads))
             {
                 auto mods = compileNow[compileNow.length * th / threads .. compileNow.length * (th + 1) / threads];
 
-                if (globalParams.verbose)
+                if (globalParams.verbose && mods.length)
                 {
-                    if (mods.length)
-                    writefln("Thread %s: compiling:", th);
+                    logger[th] = format("Thread %s: compiling:\n", th);
                     foreach (mod; mods)
                     {
-                        writefln("  mod name :%s mod path: %s ", mod.name, mod.path);
+                        logger[th] ~= format("  Module: %s\n  Path: %s \n", mod.name, mod.path);
                     }
                 }
                 
@@ -565,6 +567,14 @@ void compile(ref Module[string] modules /+, ref Module[] moduleStack+/)
                         threadLater[th],
                         getNthAffinityMaskBit(th)
                         );
+                }
+            }
+
+            foreach (i; 0 .. threads)
+            {
+                if (auto log = i in logger)
+                {
+                    writeln(*log);
                 }
             }
 

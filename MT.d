@@ -4,37 +4,17 @@
 
 module xfbuild.MT;
 
+import xfbuild.Exception;
+
 import std.string : format;
 import std.exception;
 import std.stdio;
 
-version (MultiThreaded)
-{
-    import core.atomic;
-}
-
-// todo: implement a proper logger
-struct TraceLog
-{
-    string error;
-    
-    void formatln(string frm, Exception exception)
-    {
-        error ~= format(frm, exception) ~ " ";
-    }
-}
-
-__gshared TraceLog Trace;
-
 version (MultiThreaded) 
 {
+    import core.atomic;
     import std.parallelism;
     import std.c.process;
-    
-    private 
-    {
-        import xfbuild.Exception;
-    }
 
     struct MTFor
     {
@@ -48,14 +28,14 @@ version (MultiThreaded)
 
             MTFor result;
             result.taskPool = taskPool;
-            result.from       = from;
-            result.to         = to;
+            result.from     = from;
+            result.to       = to;
 
             if (numPerTask == 0)
             {
                 result.numPerTask = (to - from) / 4;
 
-                if (result.numPerTask == 0)                // (to - from) < 4
+                if (result.numPerTask == 0)  // (to - from) < 4
                     result.numPerTask = 1;
             }
             else
@@ -71,7 +51,7 @@ version (MultiThreaded)
 
             assert(numPerTask > 0);
 
-            int numLeft;             // was Atomic!(int)
+            shared int numLeft;
             int numTasks = (to - from) / numPerTask;
 
             assert(numTasks > 0);
@@ -89,27 +69,15 @@ version (MultiThreaded)
                 }
             }
 
-            void theTask(void* arg)
+            void theTask(int arg)
             {
-                try
-                {
-                    run(cast(int)arg);
-                }
-                catch (BuildException e)
-                {
-                    enforce(0, format("Build failed: %s", e));
-                }
-                catch (Exception e)
-                {
-                    enforce(0, e);
-                }
-                
+                run(arg);                
                 atomicOp!"+="(numLeft, -1);
             }
 
             for (int i = 0; i < numTasks - 1; ++i)
             {
-                auto aTask = task(&theTask, cast(void*)i);
+                auto aTask = task(&theTask, i);
                 taskPool.put(aTask);
             }
 

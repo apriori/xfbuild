@@ -23,6 +23,9 @@ import std.file;
 // std.path is missing isFilePath/isDirPath
 bool isValidFilePath(string filePath)
 {
+    if (filePath.length == 0)
+        return false;
+    
     auto end = filePath[$-1];
     return (filePath.isValidPath && 
             end != '/' && end != '\\' && 
@@ -32,7 +35,7 @@ bool isValidFilePath(string filePath)
 void verifyMakeFilePath(string filePath, string option)
 {
     enforceEx!ParseException(filePath.isValidFilePath,
-                             format("%s option must be a valid file path: `%s`", 
+                             format("%s option must be a valid file path: \"%s\"", 
                                      option, 
                                      filePath));
     

@@ -179,7 +179,16 @@ void executeAndCheckFail(string[] cmd, size_t affinity)
     }
 }
 
-__gshared int value;
+version (MultiThreaded)
+{
+    // @BUG@ 7036
+    //~ shared int value;
+    __gshared int value;
+}
+else
+{
+    __gshared int value;
+}
 
 void executeCompilerViaResponseFile(string compiler, string[] args, size_t affinity)
 {
@@ -192,7 +201,7 @@ void executeCompilerViaResponseFile(string compiler, string[] args, size_t affin
         value += 1;
     }
     
-    string rspFile = format("xfbuild.%s.rsp", value);    
+    string rspFile = format("xfbuild.%s.rsp", value);
     string rspData = args.join("\n");
 
     /+if (globalParams.verbose) {

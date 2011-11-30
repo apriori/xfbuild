@@ -181,7 +181,9 @@ struct BuildTask
                     if (m.modified && !m.isHeader)
                     {
                         if (globalParams.verbose)
-                            writefln("%s was modified", m.name);
+                        {
+                            //~ writefln("%s was modified", m.name);
+                        }
 
                         m.needRecompile = true;
 
