@@ -10,7 +10,6 @@ module xfbuild.Pipes;
 import xfbuild.Exception;
 
 version (Windows)
-version (Pipes)
 {
 
 import core.memory;
@@ -209,4 +208,4 @@ void ErrorExit(string lpszFunction)
     throw new ProcessExecutionException(errorMsg, __FILE__, __LINE__);
 }
 
-}  // version(Windows) version(Pipes)
+}  // version(Windows)

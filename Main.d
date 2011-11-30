@@ -20,6 +20,7 @@ import dcollections.HashMap;
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.datetime;
 import std.exception;
 import std.stdio;
 import std.file;
@@ -56,10 +57,7 @@ Recognized OPTION(s):
     +redep          Remove the dependency file afterwards
     +v              Print the compilation commands
     +h              Manage headers for faster compilation
-`
-
-        //    +profile     Dump profiling info at the end
-        `    +mod-limit=NUM  Compile max NUM modules at a time
+    +mod-limit=NUM  Compile max NUM modules at a time
     +D=DEPS         Put the resulting dependencies into DEPS [default: .deps]
     +O=OBJS         Put compiled objects into OBJS [default: .objs]
     +q              Use -oq when compiling (only supported by ldc)
@@ -75,35 +73,33 @@ Recognized OPTION(s):
                     (useful to debug some compiler bugs)
     +R              Recursively scan directories for modules
     +nodeps         Don't use dependencies' file
-    +keeprsp        Don't remove .rsp files upon errors`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        );
-    version (MultiThreaded) 
-    {
-        writeln(`
+    +keeprsp        Don't remove .rsp files upon errors`);
 
+version (MultiThreaded) 
+{
+writeln(
+`
 Multithreading options:
     +threads=NUM           Number of theads to use [default: CPU core count]
     +no-affinity           Do NOT manage process affinity (New feature which
                            should prevent DMD hanging on multi-core systems)
     +linker-affinity=MASK  Process affinity mask for the linker
-                           (hexadecimal) [default: {:x} (OS-dependent)]`,
-                        globalParams.linkerAffinityMask
-                        );
-    }
+                           (hexadecimal) [default: {:x} (OS-dependent)]`);
+}
 
-    writeln(`
-	
+writeln(
+`
 Environment Variables:
 	XFBUILDFLAGS You can put any option from above into that variable
 	               Note: Keep in mind that command line options override
 	                     those
 	D_COMPILER   The D Compiler to use [default: dmd]
 	               Note: XFBUILDFLAGS and command line options override
-	                     this
-`
+	                     this`
           );
 
     debug
-        writefln("\nBuilt with %s v%s and Phobos at %s %s\n",
+        writefln("\nBuilt with %s v%s and Phobos at %s %s",
                         __VENDOR__, __VERSION__, __DATE__, __TIME__);
 
     exit(status);
@@ -193,7 +189,14 @@ void determineSystemSpecificOptions()
 }
 
 int main(string[] allArgs)
-{
+{  
+    version(Profile)
+    {
+        auto argsWatch = StopWatch(AutoStart.yes);
+        //~ argsWatch.stop();
+        //~ writefln("--Profiler-- Argument parsing done in %s msecs.", argsWatch.peek.msecs);
+    }
+    
     mutex = new Foo;
     determineSystemSpecificOptions();
 
@@ -231,7 +234,6 @@ int main(string[] allArgs)
 
     try
     {
-        //profile!("main")({
         string[] dirsAndModules;
 
         foreach (arg; allArgs[1..$])
@@ -421,6 +423,12 @@ int main(string[] allArgs)
         parser.parse(envArgs);
         parser.parse(args);
 
+        version(Profile)
+        {
+            argsWatch.stop();
+            writefln("--Profiler-- Argument parsing done in %s msecs.", argsWatch.peek.msecs);
+        }                    
+                    
         //------------------------------------------------------------
         void _ScanForModules(string[] paths, ref string[] modules, bool recursive = false, bool justCheckAFolder = false)
         {
@@ -446,8 +454,21 @@ int main(string[] allArgs)
 
         //-----------------------------------------------------------
 
+        version(Profile)
+        {
+            auto scanWatch = StopWatch(AutoStart.yes);
+            //~ scanWatch.stop();
+            //~ writefln("--Profiler-- Argument parsing done in %s msecs.", scanWatch.peek.msecs);
+        }
+        
         _ScanForModules(dirsAndModules, mainFiles, globalParams.recursiveModuleScan);
-
+        
+        version(Profile)
+        {
+            scanWatch.stop();
+            writefln("--Profiler-- Module scanning done in %s msecs.", scanWatch.peek.msecs);
+        }
+        
         if ("increBuild" == globalParams.compilerName)
         {
             globalParams.useOP  = true;
@@ -469,10 +490,10 @@ int main(string[] allArgs)
            }+/
         
         {
-            
-            auto buildTask = BuildTask(!removeDeps, mainFiles);
+            bool doWriteDeps = !removeDeps;
+            auto buildTask = BuildTask(doWriteDeps, mainFiles);
 
-            if (!std.file.exists(globalParams.objPath))
+            if (!globalParams.objPath.exists)
                 mkdir(globalParams.objPath);
 
             if (removeObjs)
@@ -482,23 +503,21 @@ int main(string[] allArgs)
             {
                 try 
                 {
-                    if (std.file.exists(globalParams.depsPath))
+                    if (globalParams.depsPath.exists)
                     {
                         std.file.remove(globalParams.depsPath); 
                     }
                 }
                 catch (Exception exc) 
-                { 
-                    writeln("Couldn't remove deps file."); 
+                {
+                    enforceEx!BuildException(0, format("Couldn't remove deps file %s.", globalParams.depsPath));
                 }
             }
 
             if (quit)
                 return 0;
-
             
-            if (mainFiles is null)
-                throw new BuildException("At least one MODULE needs to be specified, see +help");
+            enforceEx!ParseException(mainFiles !is null, "At least one Module needs to be specified, see +help.");
 
             buildTask.execute();
         }

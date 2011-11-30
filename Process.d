@@ -12,6 +12,8 @@ import xfbuild.Exception;
 
 version (Windows) 
 {
+    import xfbuild.Pipes;
+    
     import win32.windef;
     import win32.winuser;
     import win32.winbase;
@@ -31,6 +33,7 @@ version (MultiThreaded)
 import std.algorithm;
 import std.concurrency;
 import std.exception;
+import std.datetime;
 import std.process;
 import std.stdio;
 import std.string;
@@ -44,6 +47,19 @@ import std.array;
 import std.random;
 import std.format;
 import std.file;
+
+struct ProfWatch
+{
+    void restart()
+    {
+        sw.stop();
+        sw.reset();
+        sw.start();
+    }
+    
+    StopWatch sw;
+    alias sw this;
+}
 
 // modified from std.process.shell 
 // (nothrow, saves output)
@@ -139,19 +155,31 @@ string execute(Process process)
 // @TODO@ Implement pipes here
 void executeAndCheckFail(string[] cmd, size_t affinity)
 {
-    version (Windows)
-    version (Pipes)
+    version (Profile)
     {
-        import xfbuild.Pipes;
+        auto thisSw = StopWatch(AutoStart.yes);
+        scope (exit)
+        {
+            thisSw.stop();
+            writefln("--Profiler-- Execute compiler and check fail done in %s msecs.", thisSw.peek.msecs);
+        }
     }
-
+    
     version (Windows)
     {
+        version (Profile) { auto sw = ProfWatch(); sw.restart(); }
         auto procInfo = createProcessPipes();
+        version (Profile) writefln("--Profiler-- Pipes created in %s msecs.", sw.peek.msecs);
+        
         string sys = cmd.join(" ");
         
+        version (Profile) sw.restart();
         auto result = runProcess(sys, procInfo);
+        version (Profile) writefln("--Profiler-- Run compiler process done in %s msecs.", sw.peek.msecs);
+        
+        version (Profile) sw.restart();
         auto output = readProcessPipeString(procInfo);
+        version (Profile) writefln("--Profiler-- Reading pipes done in %s msecs.", sw.peek.msecs);
         
         if (result != 0)
         {

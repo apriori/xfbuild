@@ -157,7 +157,7 @@ class Module
                 m.name = arr[0];
 
                 if (globalParams.verbose) 
-                    writefln("module name for file '%s': %s", path, m.name);
+                    writefln("Module name for file '%s': %s", path, m.name);
 
                 break;
             }

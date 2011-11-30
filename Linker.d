@@ -171,22 +171,10 @@ bool link(ref Module[string] modules, string[] mainFiles = null)
 
         try
         {
-            // todo: replace with a system call? find one which returns 0,
-            // it's probably synchronous
             checkProcessFail(process);
         }
         catch (Exception e)
         {
-            version (Windows) 
-            {
-                // I don't know if Windows is affected too?
-            }
-            else
-            {
-                // DMD somehow puts some linker errors onto stdout
-                //~ Stderr.copy(process.stdout).flush;
-            }
-
             if (retryCompile)
             {
                 if (globalParams.verbose) 

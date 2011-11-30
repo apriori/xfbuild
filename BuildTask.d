@@ -16,6 +16,7 @@ import xfbuild.Misc;
 import std.algorithm;
 import std.file;
 import std.conv;
+import std.datetime;
 import std.stdio;
 import std.string;
 import std.path;
@@ -28,7 +29,7 @@ struct BuildTask
 
     //Module[]	moduleStack;
 
-    this( bool doWriteDeps, string[] mainFiles ...)
+    this(bool doWriteDeps, string[] mainFiles ...)
     {
         this.doWriteDeps = doWriteDeps;
         this.mainFiles   = mainFiles;
@@ -40,7 +41,7 @@ struct BuildTask
         //});
     }
 
-    ~this( )
+    ~this()
     {
         //profile!("BuildTask.writeDeps")({
         if (this.doWriteDeps)
@@ -66,6 +67,16 @@ struct BuildTask
 
     void compile()
     {
+        version (Profile)
+        {
+            auto sw = StopWatch(AutoStart.yes);
+            scope (exit)
+            {
+                sw.stop();
+                writefln("--Profiler-- Compiling done in %s msecs.", sw.peek.msecs);
+            }
+        }
+        
         //profile!("BuildTask.compile")({
         //if (moduleStack.length > 0) {
         .compile(modules);
@@ -76,6 +87,16 @@ struct BuildTask
 
     bool link()
     {
+        version (Profile)
+        {
+            auto sw = StopWatch(AutoStart.yes);
+            scope (exit)
+            {
+                sw.stop();
+                writefln("--Profiler-- Linking done in %s msecs.", sw.peek.msecs);
+            }
+        }              
+        
         if (globalParams.outputFile is null)
         {
             return false;
@@ -90,7 +111,17 @@ struct BuildTask
     // todo: refactor this
     private void readDeps()
     {
-        if (globalParams.useDeps && std.file.exists(globalParams.depsPath))
+        version (Profile)
+        {
+            auto sw = StopWatch(AutoStart.yes);
+            scope (exit)
+            {
+                sw.stop();
+                writefln("--Profiler-- Reading deps done in %s msecs.", sw.peek.msecs);
+            }
+        }
+        
+        if (globalParams.useDeps && globalParams.depsPath.exists)
         {
             auto depsPath = globalParams.depsPath;
             
@@ -169,7 +200,7 @@ struct BuildTask
 
                     //Stdout(time, deps).newline;
 
-                    if (!std.file.exists(path))
+                    if (!path.exists)
                         continue;
 
                     auto m = new Module;
@@ -191,7 +222,7 @@ struct BuildTask
                     }
                     else if (globalParams.compilerName != "increBuild")
                     {
-                        if (!std.file.exists(m.objFile))
+                        if (!m.objFile.exists)
                         {
                             if (globalParams.verbose)
                                 writefln("%s's obj file was removed", m.name);
@@ -253,6 +284,16 @@ struct BuildTask
 
     private void writeDeps()
     {
+        version (Profile)
+        {
+            auto sw = StopWatch(AutoStart.yes);
+            scope (exit)
+            {
+                sw.stop();
+                writefln("--Profiler-- Writing deps done in %s msecs.", sw.peek.msecs);
+            }
+        }      
+        
         auto depsFile = File(globalParams.depsPath, "w");
         scope(exit)
         {
@@ -295,7 +336,7 @@ struct BuildTask
 
         foreach (m; modules)
         {
-            if (std.file.exists(m.objFile))
+            if (m.objFile.exists)
             {
                 std.file.remove(m.objFile);
                 m.needRecompile = true;
