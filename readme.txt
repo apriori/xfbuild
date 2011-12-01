@@ -43,18 +43,20 @@
     To avoid compiling modules in a path (e.g. Phobos, since DMD links it in implicitly)
     use the +xpath option:
         xfbuild +omain.exe +xpath=D:\DMD\dmd2\src main.d
-        
-    This can lead to substantially faster builds.
+    
+    +xpath avoids compiling modules inside of a path, and instead allows you to pass a
+    prebuilt static library to the compiler. This can lead to faster build times.
     
     Tip: On Ubuntu use xpath=/usr/include/d/ if xfBuild is having file  
          write errors.
     Tip: If xfbuild is having problems doing incremental compilation,
          try passing the +full switch
     
-    Note that if you use the +x (for packages) or +xpath (for paths)
-    to avoid compiling modules from a custom library you will typically 
-    have to pass the path to the prebuild library. Otherwise you'll
-    get linking errors.
+    Note: When using +x (for packages) or +xpath (for paths) with
+    custom libraries (not Phobos), you will have to pass the
+    prebuilt static library to the compiler. E.g.:
+    
+    xfbuild +xpath=C:\dev\mylib\ C:\dev\mylib.lib
 
 == What works ==
     Very simple hello_world builds, and most of my "sample code" stuff in my
