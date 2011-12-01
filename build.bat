@@ -13,4 +13,4 @@ set "VERSION=-version=MultiThreaded"
 set "RUN="
 :: ~ set "RUN=&& bin\xfbuild.exe"
 
-dmd -ofbin\xfbuild.exe %FLAGS% %MODULES% %VERSION% -I.. -I..\WindowsAPI ..\WindowsAPI\win32.lib %WINVERSIONS% -Idcollections-2.0c dcollections-2.0c\dcollections.lib %RUN%
+dmd -ofbin\xfbuild.exe %FLAGS% %MODULES% %VERSION% -I.. win32.lib %WINVERSIONS% -Idcollections-2.0c dcollections-2.0c\dcollections.lib %RUN%

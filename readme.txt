@@ -14,32 +14,12 @@
       Usage instructions: http://d-programming-language.org/dmd-windows.html
                           http://d-programming-language.org/dmd-linux.html
 
-    - Windows only: WindowsAPI bindings library, get it from here:
-        http://dsource.org/projects/bindings/wiki/WindowsApi
-    
-      Then:
-        1. Install it next to the xfBuild dir:
-          .\xfBuild 
-          .\WindowsAPI
-          
-        2. Copy the build_unicode.bat file from:
-             .\xfBuild\win32\build_unicode.bat
-           to:
-             .\WindowsAPI\win32\build_unicode.bat
-             
-           and run it to build the static library.
-    
-    - DCollections 2.0 (included). Also obtainable from:
-        http://www.dsource.org/projects/dcollections
-
     xfBuild was tested on XP SP3 and Lubuntu, x86.
     OSX has not yet been tested.
       
 == Building xfBuild ==
     Windows: 
         Run build.bat
-        Alternatively use selfbuild.bat for self builds.
-        
         Optionally, add to PATH (change this appropriately)
             PATH=%PATH%;c:\xfBuild\
 
@@ -57,10 +37,10 @@
         you're already running.
 
 == Usage Instructions ==
-    To get an executable use the +o switch:
+    To output an executable use the +o switch:
         xfBuild +omain.exe main.d (or +omain for linux)
       
-    To avoid compiling modules in a path (e.g. Phobos since DMD links it in implicitly)
+    To avoid compiling modules in a path (e.g. Phobos, since DMD links it in implicitly)
     use the +xpath option:
         xfbuild +omain.exe +xpath=D:\DMD\dmd2\src main.d
         
