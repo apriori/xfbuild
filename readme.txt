@@ -46,10 +46,13 @@
         
     This can lead to substantially faster builds.
     
-    Ubuntu note: Use xpath=/usr/include/d/ if xfBuild is having file write errors.
+    Tip: On Ubuntu use xpath=/usr/include/d/ if xfBuild is having file  
+         write errors.
+    Tip: If xfbuild is having problems doing incremental compilation,
+         try passing the +full switch
     
     Note that if you use the +x (for packages) or +xpath (for paths)
-    to avoid compiling modules from a custom library, you will typically 
+    to avoid compiling modules from a custom library you will typically 
     have to pass the path to the prebuild library. Otherwise you'll
     get linking errors.
 
