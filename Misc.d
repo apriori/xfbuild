@@ -134,7 +134,7 @@ string[] decomposeString(string str, string[] foo ...)
                 auto delim = foo[fi + 1];
                 assert(delim !is null);
 
-                int l = str.locatePattern(delim);
+                size_t l = str.locatePattern(delim);
                 if (l == -1)
                 {
                     return null;  // fail
